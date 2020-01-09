@@ -4,5 +4,4 @@ scratch
 *.o
 thready
 threadydebug
-*.json
 callgrind.out*
