@@ -32,6 +32,7 @@ thready: ${src}
 clean:
 	-rm *.o
 	-rm thready threadydebug
+	-rm callgrind.out*
 	-rm -r build/doc/*
 
 
@@ -47,9 +48,11 @@ documentation: Doxyfile
 install: thready threadydebug
 	cp $< ~/.local/bin
 
-test:
+
+test: thready
 	valgrind --quiet --leak-check=full --leak-resolution=high ./thready -n makefile-valgrind -j test/p41-ts-nointerarrival-0.5hi.json
 	valgrind --quiet --leak-check=full --leak-resolution=high ./thready -n makefile-valgrind -j test/p41-ts-nointerarrival-nohi.json
 
-profile:
-	valgrind --tool=callgrind ./thready -n makefile-callgrind -j test/p41-ts-nointerarrival-nohi.json -t 360000000
+
+profile: threadydebug
+	valgrind --tool=callgrind ./threadydebug -n makefile-callgrind -j test/p41-ts-nointerarrival-nohi.json -t 360000000
