@@ -1,5 +1,8 @@
 # thready - A lightweight and fast scheduling simulator
 
+[![DOI](https://zenodo.org/badge/232762434.svg)](https://zenodo.org/badge/latestdoi/232762434)
+
+
 Thready (thread + ready) simulates a uniprocessor scheduling a sporadic task system according to the earliest deadline first (EDF) algorithm.
 
 
