@@ -88,7 +88,7 @@ int main(int argc, char* argv[]) {
         parg_init(&ps);
         // abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ
         //        x x   x   x x xx  x
-        while ((c = parg_getopt(&ps, argc, argv, "hz:t:vj:r:n:")) != -1) {
+        while ((c = parg_getopt(&ps, argc, argv, "hz:t:vj:r:n:w:")) != -1) {
                 switch (c) {
                         case 1:
                                 printf("nonoption '%s'\n", ps.optarg);
