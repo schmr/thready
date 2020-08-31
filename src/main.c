@@ -38,6 +38,7 @@ struct state {
         int randomseed_jobtrace;
         char prefix[STATE_PREFIXBUFLEN];
         JOB_INT breaktime;
+        JOB_INT speed;
 };
 
 static struct state* state_reference;
@@ -76,6 +77,7 @@ int main(int argc, char* argv[]) {
 
         // Setting default values
         s->breaktime = 60000;
+        s->speed = 1;
 
         int prefixlen = 0;
 
@@ -85,7 +87,7 @@ int main(int argc, char* argv[]) {
         int c;
         parg_init(&ps);
         // abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ
-        //        x x   x   x x x   x
+        //        x x   x   x x xx  x
         while ((c = parg_getopt(&ps, argc, argv, "hz:t:vj:r:n:")) != -1) {
                 switch (c) {
                         case 1:
@@ -98,6 +100,7 @@ int main(int argc, char* argv[]) {
                                     "[-z jobtracerandomseed] "
                                     "-n dumpprefix "
                                     "-t breaktime "
+                                    "-w work/timestep "
                                     "-j <tasksystemfile.json>\n");
                                 exit(EXIT_SUCCESS);
                                 break;
@@ -131,10 +134,13 @@ int main(int argc, char* argv[]) {
                         case 't':
                                 s->breaktime = atoll(ps.optarg);
                                 break;
+                        case 'w': // Processor speed; work done per timestep
+                                s->speed = atoll(ps.optarg);
+                                break;
                         case '?':
                                 if ((ps.optopt == 't') || (ps.optopt == 'j') ||
                                     (ps.optopt == 'z') || (ps.optopt == 'r') ||
-                                    (ps.optopt == 'n')) {
+                                    (ps.optopt == 'n') || (ps.optopt == 'w')) {
                                         printf(
                                             "option -%c requires an argument\n",
                                             ps.optopt);
@@ -203,7 +209,7 @@ int main(int argc, char* argv[]) {
                 // Nothing to simulate
                 r = EVL_PASS;
         } else {
-                r = eventloop_run(s->evl, s->breaktime);
+                r = eventloop_run(s->evl, s->breaktime, s->speed);
         }
 
         // Dump results

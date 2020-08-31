@@ -92,7 +92,7 @@ EVL_INT eventloop_get_now(eventloop* evl);
  *         :Get deadline and
  *         computation demand
  *         from current job;
- *         if (runtime <= computation) then (yes)
+ *         if (runtime*speed <= computation) then (yes)
  *           :Progress time
  *           by runtime;
  *           :Subtract runtime
@@ -177,9 +177,10 @@ EVL_INT eventloop_get_now(eventloop* evl);
  * @enduml
  * @param evl Initialized eventloop.
  * @param breaktime Absolute time where simulation ends in the error-free case.
+ * @param speed Processor speed in unit of work per timestep.
  * @return Signal successful scheduling or deadline miss.
  */
-eventloop_result eventloop_run(eventloop* evl, JOB_INT breaktime);
+eventloop_result eventloop_run(eventloop* evl, JOB_INT breaktime, JOB_INT speed);
 
 /**
  * @brief Human readable state print of eventloop.

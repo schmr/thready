@@ -61,7 +61,7 @@ EVL_INT eventloop_get_now(eventloop* evl) {
         return evl->now;
 }
 
-eventloop_result eventloop_run(eventloop* evl, JOB_INT breaktime) {
+eventloop_result eventloop_run(eventloop* evl, JOB_INT breaktime, JOB_INT speed) {
         // Initialize local pointers, now is set to starttime of current job
         // by initialization of eventloop, and currentjob is added to scheduler
         // queue.
@@ -77,6 +77,7 @@ eventloop_result eventloop_run(eventloop* evl, JOB_INT breaktime) {
                 } else {  // absolute breaktime earlier than next arrival
                         runtime = breaktime - evl->now;
                 }
+                JOB_INT workdelta = runtime * speed;
                 while (runtime > 0) {
                         currentjob = jobq_peek(evl->pq);
                         if (!currentjob) {  // No job in scheduler queue
@@ -84,13 +85,16 @@ eventloop_result eventloop_run(eventloop* evl, JOB_INT breaktime) {
                         }
                         JOB_INT deadline = job_get_deadline(currentjob);
                         JOB_INT c = job_get_computation(currentjob);
-                        if (runtime <= c) {  // Spend complete runtime on job
+                        if (workdelta <= c) {  // Spend complete runtime on job
                                 evl->now = evl->now + runtime;
-                                job_set_computation(currentjob, c - runtime);
+                                job_set_computation(currentjob, c - workdelta);
                                 runtime = 0;
                         } else {  // Finish job and update runtime budget
                                 evl->now = evl->now + c;
-                                runtime = runtime - c;
+                                runtime = runtime - c / speed; // truncation is optimistic
+                                if (c % speed > 0) { // conservative; wasting some capacity
+                                        runtime -= 1;
+                                }
                                 // Free finished job
                                 job_free(jobq_pop(evl->pq));
                                 evl->jobs_done++;
