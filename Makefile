@@ -14,7 +14,7 @@ src := $(addsuffix .c, $(addprefix src/, ${modules}))
 obj := $(addsuffix .o, ${modules})
 
 
-all: thready threadydebug
+all: thready
 
 
 %.o: src/%.c
@@ -45,8 +45,8 @@ documentation: Doxyfile
 	doxygen Doxyfile
 
 
-install: thready threadydebug
-	cp $< ~/.local/bin
+install: thready
+	cp $^ ~/.local/bin
 
 
 test: thready
