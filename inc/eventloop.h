@@ -75,6 +75,8 @@ EVL_INT eventloop_get_now(eventloop* evl);
  *       duration from now to
  *       requested breaktime;
  *     endif
+ *     :Adjust runtime if requested
+ *     to consider breaking on overrun;
  *   }
  *
  *   partition Progress {
@@ -157,6 +159,13 @@ EVL_INT eventloop_get_now(eventloop* evl);
  *     stop
  *   else (no)
  *   endif
+ *   :Check for task overrun;
+ *   if () then (yes)
+ *     :Return EVL_OVERRUN;
+ *     stop
+ *   else (no)
+ *   endif
+ *
  *
  *
  *   partition Arrival {
