@@ -55,6 +55,7 @@ test: thready
 
 testdebug: threadydebug
 	valgrind --quiet --leak-check=full --leak-resolution=high ./threadydebug -n makefile-valgrind -j test/p41-ts-nointerarrival-0.5hi.json
+	valgrind --quiet --leak-check=full --leak-resolution=high ./threadydebug -b -n makefile-valgrind -j test/p41-ts-nointerarrival-0.5hi.json
 	valgrind --quiet --leak-check=full --leak-resolution=high ./threadydebug -n makefile-valgrind -j test/p41-ts-nointerarrival-nohi.json
 
 

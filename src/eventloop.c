@@ -78,7 +78,16 @@ eventloop_result eventloop_run(eventloop* evl, JOB_INT breaktime, JOB_INT speed,
                         runtime = breaktime - evl->now;
                 }
                 // Check if current task overruns earlier than next task arrival
-                JOB_INT overruntime = job_get_overruntime(currentjob);
+                currentjob = jobq_peek(evl->pq);
+                JOB_INT overruntime;
+                if (currentjob) {
+                        overruntime = job_get_overruntime(currentjob);
+                } else {
+                        // If there is no job in scheduler queue,
+                        // disable overrun checking with dummy overrun time which
+                        // is too late to be considered.
+                        overruntime = arrival + 123;
+                }
                 if (overrunbreak && (overruntime < arrival)) {
                         runtime = overruntime - evl->now;
                 }
@@ -126,6 +135,8 @@ eventloop_result eventloop_run(eventloop* evl, JOB_INT breaktime, JOB_INT speed,
                         break;
                 }
                 if (overrunbreak && (evl->now == overruntime)) {
+                        evl->currentjob = currentjob;
+                        evl->nextjob = nextjob;
                         return EVL_OVERRUN;
                 }
                 // Arrival
