@@ -16,18 +16,21 @@ this software. If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 struct job {
         JOB_INT taskid;
         JOB_INT starttime;
+        JOB_INT overruntime;
         JOB_INT deadline;
         JOB_INT computation;
 };
 
 job* job_init(JOB_INT const taskid,
               JOB_INT const starttime,
+              JOB_INT const overruntime,
               JOB_INT const deadline,
               JOB_INT const computation) {
         job* j = malloc(sizeof(job));
         if (j) {
                 j->taskid = taskid;
                 j->starttime = starttime;
+                j->overruntime = overruntime;
                 j->deadline = deadline;
                 j->computation = computation;
                 return j;
@@ -47,6 +50,9 @@ JOB_INT job_get_taskid(job* const j) {
 }
 JOB_INT job_get_starttime(job* const j) {
         return j->starttime;
+}
+JOB_INT job_get_overruntime(job* const j) {
+        return j->overruntime;
 }
 JOB_INT job_get_deadline(job* const j) {
         return j->deadline;

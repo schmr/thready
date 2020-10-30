@@ -34,15 +34,19 @@ typedef struct job job;
  * @p deadline is the absolute deadline of the job,
  * and @p computation is the amout of time required to execute the job on the
  * uniprocessor.
+ * In mixed criticality simulations @p overruntime is the absolute time when
+ * the job requires more computation than expected (budget + one time step).
  *
  * @param taskid Id of the task
  * @param starttime Job arrival time
+ * @param overruntime Job overrun time
  * @param deadline Absolute deadline
  * @param computation Time required to execute the job on the uniprocessor
  * @returns Handle to initialized job.
  */
 job* job_init(JOB_INT const taskid,
               JOB_INT const starttime,
+              JOB_INT const overruntime,
               JOB_INT const deadline,
               JOB_INT const computation);
 
@@ -53,6 +57,7 @@ void job_free(job* const j);
 
 JOB_INT job_get_taskid(job* const j);
 JOB_INT job_get_starttime(job* const j);
+JOB_INT job_get_overruntime(job* const j);
 JOB_INT job_get_deadline(job* const j);
 JOB_INT job_get_computation(job* const j);
 

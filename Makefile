@@ -53,6 +53,10 @@ test: thready
 	valgrind --quiet --leak-check=full --leak-resolution=high ./thready -n makefile-valgrind -j test/p41-ts-nointerarrival-0.5hi.json
 	valgrind --quiet --leak-check=full --leak-resolution=high ./thready -n makefile-valgrind -j test/p41-ts-nointerarrival-nohi.json
 
+testdebug: threadydebug
+	valgrind --quiet --leak-check=full --leak-resolution=high ./threadydebug -n makefile-valgrind -j test/p41-ts-nointerarrival-0.5hi.json
+	valgrind --quiet --leak-check=full --leak-resolution=high ./threadydebug -n makefile-valgrind -j test/p41-ts-nointerarrival-nohi.json
+
 
 profile: threadydebug
 	valgrind --tool=callgrind ./threadydebug -n makefile-callgrind -j test/p41-ts-nointerarrival-nohi.json -t 360000000

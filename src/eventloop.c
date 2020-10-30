@@ -61,7 +61,7 @@ EVL_INT eventloop_get_now(eventloop* evl) {
         return evl->now;
 }
 
-eventloop_result eventloop_run(eventloop* evl, JOB_INT breaktime, JOB_INT speed) {
+eventloop_result eventloop_run(eventloop* evl, JOB_INT breaktime, JOB_INT speed, bool overrunbreak) {
         // Initialize local pointers, now is set to starttime of current job
         // by initialization of eventloop, and currentjob is added to scheduler
         // queue.
@@ -76,6 +76,11 @@ eventloop_result eventloop_run(eventloop* evl, JOB_INT breaktime, JOB_INT speed)
                         runtime = arrival - evl->now;
                 } else {  // absolute breaktime earlier than next arrival
                         runtime = breaktime - evl->now;
+                }
+                // Check if current task overruns earlier than next task arrival
+                JOB_INT overruntime = job_get_overruntime(currentjob);
+                if (overrunbreak && (overruntime < arrival)) {
+                        runtime = overruntime - evl->now;
                 }
                 while (runtime > 0) {
                         currentjob = jobq_peek(evl->pq);
@@ -120,6 +125,9 @@ eventloop_result eventloop_run(eventloop* evl, JOB_INT breaktime, JOB_INT speed)
                         evl->now = breaktime;  // Equalize now for both cases
                         break;
                 }
+                if (overrunbreak && (evl->now == overruntime)) {
+                        return EVL_OVERRUN;
+                }
                 // Arrival
                 evl->now = arrival;
                 jobq_insert_by(evl->pq, nextjob, job_get_deadline);
@@ -145,6 +153,14 @@ void eventloop_print_result(eventloop const* const evl,
                 case EVL_DEADLINEMISS:
                         fprintf(stdout,
                                 "%" PRId64 ": Deadline miss after %" PRId64
+                                " events servicing %" PRId64 " jobs\n",
+                                (int64_t)(evl->now),
+                                (int64_t)(evl->events_done),
+                                (int64_t)(evl->jobs_done));
+                        break;
+                case EVL_OVERRUN:
+                        fprintf(stdout,
+                                "%" PRId64 ": Overrun after %" PRId64
                                 " events servicing %" PRId64 " jobs\n",
                                 (int64_t)(evl->now),
                                 (int64_t)(evl->events_done),
@@ -192,6 +208,7 @@ void eventloop_dump(eventloop const* const evl, FILE* stream) {
 
                 dump_json_tostream(print, job_get_taskid(j));
                 dump_json_tostream(print, job_get_starttime(j));
+                dump_json_tostream(print, job_get_overruntime(j));
                 dump_json_tostream(print, job_get_deadline(j));
                 dump_json_tostream(print, job_get_computation(j));
 
@@ -230,9 +247,10 @@ void eventloop_read_json(eventloop* evl, FILE* stream) {
                 // sorry future me/others!
                 intmax_t* taskid = selist_get(l, i++);
                 intmax_t* starttime = selist_get(l, i++);
+                intmax_t* overruntime = selist_get(l, i++);
                 intmax_t* deadline = selist_get(l, i++);
                 intmax_t* computation = selist_get(l, i++);
-                job* j = job_init(*taskid, *starttime, *deadline, *computation);
+                job* j = job_init(*taskid, *starttime, *overruntime, *deadline, *computation);
                 if (*starttime > *now) {
                         jobq_insert_by(generator, j, job_get_starttime);
                         int k = ts_get_pos_by_id(tsy, *taskid);

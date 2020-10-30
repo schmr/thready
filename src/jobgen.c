@@ -124,7 +124,19 @@ static void refill_generator(jobgen* jg, TASK_INT taskid) {
                         taskid, alpha, deadline, gamma, (gamma - c1));
         }
 
-        job* job = job_init(taskid, alpha, deadline, gamma);
+        // If a non-zero computation budget is defined and we can reach it by chance the task is a a high criticality task and can overrun.
+        JOB_INT c2 = task_get_comp(t, 2);
+        float p0 = task_get_prob(t, 0);
+        JOB_INT overruntime;
+        if ((c2 > 0) && (p0 < 1.0f)) {
+                overruntime = alpha + c1 + 1;
+        } else {
+                // Overruntime beyond deadline is not put to use by eventloop.
+                // This effectively sets the overruntime to "not available" or irrelevant.
+                overruntime = deadline + 1;
+        }
+
+        job* job = job_init(taskid, alpha, overruntime, deadline, gamma);
 
         *(jg->simtime_state + k) = simtime;
         jobq_insert_by(jg->jq, job, job_get_starttime);

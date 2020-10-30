@@ -39,6 +39,7 @@ struct state {
         char prefix[STATE_PREFIXBUFLEN];
         JOB_INT breaktime;
         JOB_INT speed;
+        bool overrunbreak;
 };
 
 static struct state* state_reference;
@@ -87,8 +88,8 @@ int main(int argc, char* argv[]) {
         int c;
         parg_init(&ps);
         // abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ
-        //        x x   x   x x xx  x
-        while ((c = parg_getopt(&ps, argc, argv, "hz:t:vj:r:n:w:")) != -1) {
+        //  x     x x   x   x x xx  x
+        while ((c = parg_getopt(&ps, argc, argv, "bhz:t:vj:r:n:w:")) != -1) {
                 switch (c) {
                         case 1:
                                 printf("nonoption '%s'\n", ps.optarg);
@@ -98,6 +99,7 @@ int main(int argc, char* argv[]) {
                                     "Usage: thready [-h] [-v] "
                                     "[-r <statedump.json>] "
                                     "[-z jobtracerandomseed] "
+                                    "[-b] "
                                     "-n dumpprefix "
                                     "-t breaktime "
                                     "-w work/timestep "
@@ -128,6 +130,9 @@ int main(int argc, char* argv[]) {
                                 }
                                 break;
                         // Simulation control
+                        case 'b':
+                                s->overrunbreak = true;
+                                break;
                         case 'z':
                                 s->randomseed_jobtrace = atoi(ps.optarg);
                                 break;
@@ -209,7 +214,7 @@ int main(int argc, char* argv[]) {
                 // Nothing to simulate
                 r = EVL_PASS;
         } else {
-                r = eventloop_run(s->evl, s->breaktime, s->speed);
+                r = eventloop_run(s->evl, s->breaktime, s->speed, s->overrunbreak);
         }
 
         // Dump results
