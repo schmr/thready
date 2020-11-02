@@ -1,20 +1,20 @@
-.PHONY: all clean format benchmark install test profile documentation
+.PHONY: all clean format benchmark install test profile documentation unittest integrationtest
 
 GIT_VERSION := $(shell git describe --abbrev=4 --dirty --always --tags)
 
 cc := gcc
 incdirs := -Iinc
 ccargscommon := -DVERSION=\"$(GIT_VERSION)\" -std=c99 -Wall -Wextra -pedantic ${incdirs}
-ccargsdebug := ${ccargscommon} -Werror -march=native -O3 -g -c
+ccargsdebug := ${ccargscommon} -Werror -march=native -O3 -g -c -fprofile-arcs -ftest-coverage -fPIC
 ccargscentos := ${ccargscommon} -march=native -O3 -s
-linkargsdebug := -g
+linkargsdebug := -g -lgcov
 
 modules := main pqueue parg rnd selist stats task ts job json jobgen jobq pqueue eventloop dump
 src := $(addsuffix .c, $(addprefix src/, ${modules}))
 obj := $(addsuffix .o, ${modules})
 
 
-all: thready
+all: thready test
 
 
 %.o: src/%.c
@@ -30,11 +30,62 @@ thready: ${src}
 
 
 clean:
-	-rm *.o
+	-rm *.o *.gcno
 	-rm thready threadydebug
-	-rm callgrind.out*
-	-rm -r build/doc/*
+	-rm thready-performance-benchmark.csv
+	-rm *_dump.json
+	-rm test_*
+	-rm vgcore.*
 
+
+install: thready
+	cp $^ ~/.local/bin
+
+# Unit test
+
+test_%: test_%.o %.o
+	${cc} -o $@ $^ ${linkargsdebug} -lcmocka
+test_jobq: test_jobq.o job.o jobq.o pqueue.o
+	${cc} -o $@ $^ ${linkargsdebug} -lcmocka
+test_ts: test_ts.o ts.o task.o selist.o rnd.o stats.o json.o dump.o
+	${cc} -o $@ $^ ${linkargsdebug} -lcmocka -lm
+test_jobgen: test_jobgen.o ts.o task.o selist.o rnd.o stats.o json.o job.o jobgen.o jobq.o pqueue.o dump.o
+	${cc} -o $@ $^ ${linkargsdebug} -lcmocka -lm
+test_eventloop: test_eventloop.o ts.o task.o selist.o rnd.o stats.o json.o job.o jobgen.o jobq.o pqueue.o eventloop.o dump.o
+	${cc} -o $@ $^ ${linkargsdebug} -lcmocka -lm
+test_dump: test_dump.o dump.o json.o selist.o
+	${cc} -o $@ $^ ${linkargsdebug} -lcmocka
+
+
+unittest: test_job test_jobq test_task test_ts test_jobgen test_eventloop test_dump
+	./test_job
+	./test_jobq
+	./test_task
+	./test_ts
+	./test_jobgen
+	./test_eventloop
+	./test_dump
+
+
+integrationtest: thready
+	valgrind --quiet --leak-check=full --leak-resolution=high ./thready -n makefile-valgrind -j test/p41-ts-nointerarrival-0.5hi.json
+	valgrind --quiet --leak-check=full --leak-resolution=high ./thready -n makefile-valgrind -j test/p41-ts-nointerarrival-nohi.json
+	valgrind --quiet --leak-check=full --leak-resolution=high ./thready -b -n makefile-valgrind -j test/p41-ts-nointerarrival-0.5hi.json
+
+# Coverage
+
+profile: threadydebug
+	valgrind --tool=callgrind ./threadydebug -n makefile-callgrind -j test/p41-ts-nointerarrival-nohi.json -t 360000000
+
+# Performance test
+
+benchmark: thready-performance-benchmark.csv
+thready-performance-benchmark.csv: thready
+	seq 30 | parallel --results $@ --eta -j1 './$< -m 36000000 -s {} | sed -e "s/.* \([0-9]\+\) events/\1/"'
+#fast2.csv: fast2
+#	seq 3600000 1000000 36000000 | parallel --results $@ --eta -j3 './$< {} 0'
+
+# Documentation
 
 format:
 	find . \( -name \*.c -or -name \*.h \) | xargs -n12 -P4 clang-format -style="{BasedOnStyle: Chromium, IndentWidth: 8}" -i
@@ -43,21 +94,3 @@ format:
 documentation: Doxyfile
 	-mkdir -p build/doc
 	doxygen Doxyfile
-
-
-install: thready
-	cp $^ ~/.local/bin
-
-
-test: thready
-	valgrind --quiet --leak-check=full --leak-resolution=high ./thready -n makefile-valgrind -j test/p41-ts-nointerarrival-0.5hi.json
-	valgrind --quiet --leak-check=full --leak-resolution=high ./thready -n makefile-valgrind -j test/p41-ts-nointerarrival-nohi.json
-
-testdebug: threadydebug
-	valgrind --quiet --leak-check=full --leak-resolution=high ./threadydebug -n makefile-valgrind -j test/p41-ts-nointerarrival-0.5hi.json
-	valgrind --quiet --leak-check=full --leak-resolution=high ./threadydebug -b -n makefile-valgrind -j test/p41-ts-nointerarrival-0.5hi.json
-	valgrind --quiet --leak-check=full --leak-resolution=high ./threadydebug -n makefile-valgrind -j test/p41-ts-nointerarrival-nohi.json
-
-
-profile: threadydebug
-	valgrind --tool=callgrind ./threadydebug -n makefile-callgrind -j test/p41-ts-nointerarrival-nohi.json -t 360000000
