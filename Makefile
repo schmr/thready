@@ -1,4 +1,4 @@
-.PHONY: all clean format benchmark install test profile documentation unittest integrationtest
+.PHONY: all clean format benchmark install test profile documentation unittest integrationtest coverage
 
 GIT_VERSION := $(shell git describe --abbrev=4 --dirty --always --tags)
 
@@ -64,10 +64,13 @@ integrationtest: thready
 
 # Coverage
 
-profile: threadydebug
-	valgrind --tool=callgrind ./threadydebug -n makefile-callgrind -j test/p41-ts-nointerarrival-nohi.json -t 360000000
+coverage: test_all
+	./test_all && gcovr -r . -e inc/rnd.h -e src/pqueue.c -e src/json.c -e src/selist.c -s
 
 # Performance test
+
+profile: threadydebug
+	valgrind --tool=callgrind ./threadydebug -n makefile-callgrind -j test/p41-ts-nointerarrival-nohi.json -t 360000000
 
 benchmark: thready-performance-benchmark.csv
 thready-performance-benchmark.csv: thready
