@@ -5,7 +5,8 @@ GIT_VERSION := $(shell git describe --abbrev=4 --dirty --always --tags)
 cc := gcc
 incdirs := -Iinc
 ccargscommon := -DVERSION=\"$(GIT_VERSION)\" -std=c99 -Wall -Wextra -pedantic ${incdirs}
-ccargsdebug := ${ccargscommon} -Werror -march=native -O3 -g -c -fprofile-arcs -ftest-coverage -fPIC
+ccargsdebugthirdparty := ${ccargscommon} -Werror -march=native -O0 -g -c
+ccargsdebug := ${ccargsdebugthirdparty} -fprofile-arcs -ftest-coverage -fPIC -DUNIT_TESTING
 ccargscentos := ${ccargscommon} -march=native -O3 -s
 linkargsdebug := -g -lgcov
 
@@ -15,6 +16,18 @@ obj := $(addsuffix .o, ${modules})
 
 
 all: thready test
+
+# Disable coverage for thirdparty code
+pqueue.o: src/pqueue.c
+	${cc} ${ccargsdebugthirdparty} $<
+parg.o: src/parg.c
+	${cc} ${ccargsdebugthirdparty} $<
+selist.o: src/selist.c
+	${cc} ${ccargsdebugthirdparty} $<
+rnd.o: src/rnd.c
+	${cc} ${ccargsdebugthirdparty} $<
+json.o: src/json.c
+	${cc} ${ccargsdebugthirdparty} $<
 
 
 %.o: src/%.c
