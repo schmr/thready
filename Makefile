@@ -47,28 +47,14 @@ install: thready
 test_%.o: test/test_%.c
 	${cc} ${ccargsdebug} $<
 
-test_%: test_%.o %.o
-	${cc} -o $@ $^ ${linkargsdebug} -lcmocka
-test_jobq: test_jobq.o job.o jobq.o pqueue.o
-	${cc} -o $@ $^ ${linkargsdebug} -lcmocka
-test_ts: test_ts.o ts.o task.o selist.o rnd.o stats.o json.o dump.o
+
+# For coverage it is nice to have a single test executable for all tests
+test_all: test_all.o ts.o task.o selist.o rnd.o stats.o json.o job.o jobgen.o jobq.o pqueue.o eventloop.o dump.o stats.o
 	${cc} -o $@ $^ ${linkargsdebug} -lcmocka -lm
-test_jobgen: test_jobgen.o ts.o task.o selist.o rnd.o stats.o json.o job.o jobgen.o jobq.o pqueue.o dump.o
-	${cc} -o $@ $^ ${linkargsdebug} -lcmocka -lm
-test_eventloop: test_eventloop.o ts.o task.o selist.o rnd.o stats.o json.o job.o jobgen.o jobq.o pqueue.o eventloop.o dump.o
-	${cc} -o $@ $^ ${linkargsdebug} -lcmocka -lm
-test_dump: test_dump.o dump.o json.o selist.o
-	${cc} -o $@ $^ ${linkargsdebug} -lcmocka
 
 
-unittest: test_job test_jobq test_task test_ts test_jobgen test_eventloop test_dump
-	./test_job
-	./test_jobq
-	./test_task
-	./test_ts
-	./test_jobgen
-	./test_eventloop
-	./test_dump
+unittest: test_all
+	./test_all
 
 
 integrationtest: thready
