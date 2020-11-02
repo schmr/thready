@@ -30,10 +30,11 @@ thready: ${src}
 
 
 clean:
-	-rm *.o *.gcno
+	-rm *.o *.gcno *.gcda
 	-rm thready threadydebug
 	-rm thready-performance-benchmark.csv
 	-rm *_dump.json
+	-rm test-eventloop-*.json
 	-rm test_*
 	-rm vgcore.*
 
@@ -42,6 +43,9 @@ install: thready
 	cp $^ ~/.local/bin
 
 # Unit test
+
+test_%.o: test/test_%.c
+	${cc} ${ccargsdebug} $<
 
 test_%: test_%.o %.o
 	${cc} -o $@ $^ ${linkargsdebug} -lcmocka

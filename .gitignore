@@ -2,6 +2,8 @@ tags
 scratch
 .banner
 *.o
+*.gcno
+*.gcda
 thready
 threadydebug
 callgrind.out*

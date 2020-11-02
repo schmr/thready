@@ -30,7 +30,7 @@ this software. If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 struct state {
         ts* tsy;
-        struct jobgen_parameters* p;
+        //struct jobgen_parameters* p;
         jobgen* jg;
         eventloop* evl;
         FILE* tasksystem;

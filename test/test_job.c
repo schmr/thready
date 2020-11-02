@@ -19,14 +19,14 @@ extern int errno;
 
 
 static void test_job_allocate_ok() {
-	job* j = job_init(1, 3, 4, 5);
+	job* j = job_init(1, 3, 4, 5, 6);
 	assert_non_null(j);
 	job_free(j);
 }
 
 
 int setup_job(void** state) {
-	job* j = job_init(1, 3, 4, 5);
+	job* j = job_init(1, 3, 6, 4, 5);
 	*state = j;
 	return 0;	// error handling is in job_alloc
 }

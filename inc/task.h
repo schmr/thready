@@ -23,6 +23,7 @@ this software. If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 #define TASK_NUM_COMP 6
 #define TASK_NUM_PROB 2
+#define TASK_NUM_PARAM 12
 
 typedef struct task task;
 

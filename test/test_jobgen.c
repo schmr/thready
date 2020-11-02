@@ -19,7 +19,6 @@ this software. If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 struct state {
 	ts* tsy;
-	struct jobgen_parameters* p;
 	jobgen* jg;
 };
 
@@ -38,15 +37,7 @@ int setup_jobgen(void** state) {
 		return 1;
 	}
 
-	s->p = calloc(1, sizeof(struct jobgen_parameters));
-	if (s->p) {
-		s->p->missionduration = 3600000;
-		s->p->interarrivalfactor = 1.5f;
-		s->p->repetitions = 3;
-	} else {
-		return 1;
-	}
-	s->jg = jobgen_init(s->tsy, s->p, 12312, true);
+	s->jg = jobgen_init(s->tsy, 12312, true);
 
 	*state = s;
 	return 0;
@@ -56,7 +47,6 @@ int teardown_jobgen(void** state) {
 	struct state* s = *state;
 	jobgen_free(s->jg);
 	ts_free(s->tsy);
-	free(s->p);
 	free(s);
 	return 0;
 }
@@ -72,7 +62,7 @@ static void test_jobgen_rise(void** state) {
 	struct state* s = *state;
 	for (int i = 0; i<10; i++) {
 		job* j = jobgen_rise(s->jg);
-		assert_in_range(job_get_computation(j), 1, 10 * s->p->repetitions);
+		assert_in_range(job_get_computation(j), 1, 10);
 		assert_in_range(job_get_taskid(j) + 1, 0, 6);
 		job_free(j);
 	}

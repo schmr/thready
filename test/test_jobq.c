@@ -33,8 +33,8 @@ static void test_jobq_allocate_ok() {
 int setup_state(void** state) {
 	struct state* s = calloc(1, sizeof(struct state));
 	s->jq = jobq_init();
-	s->js[0] = job_init(1, 3, 4, 5);
-	s->js[1] = job_init(20, 40, 50, 60);
+	s->js[0] = job_init(1, 3, 7, 4, 5);
+	s->js[1] = job_init(20, 40, 101, 50, 60);
 	*state = s;
 	return 0;
 }
