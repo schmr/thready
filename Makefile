@@ -49,7 +49,7 @@ clean:
 	-rm *_dump.json
 	-rm test-eventloop-*.json
 	-rm test_*
-	-rm vgcore.*
+	-rm vgcore.* core.*
 
 
 install: thready

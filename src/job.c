@@ -26,7 +26,7 @@ job* job_init(JOB_INT const taskid,
               JOB_INT const overruntime,
               JOB_INT const deadline,
               JOB_INT const computation) {
-        job* j = malloc(sizeof(job));
+        job* j = calloc(1, sizeof(job));
         if (j) {
                 j->taskid = taskid;
                 j->starttime = starttime;
