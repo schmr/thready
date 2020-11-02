@@ -63,7 +63,7 @@ static void atexit_cleanup(void) {
         eventloop_free(state_reference->evl);
         jobgen_free(state_reference->jg);
         ts_free(state_reference->tsy);
-        free(state_reference->p);
+        //free(state_reference->p);
         free(state_reference);
         state_reference = (void*)0;
 }
