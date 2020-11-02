@@ -342,6 +342,7 @@ static void test_jobgen_dump_valid(void** state) {
 		assert_in_range(job_get_computation(j), 1, 10);
 		assert_in_range(job_get_taskid(j) + 1, 0, 6);
 	}
+        free(dump);
 }
 
 

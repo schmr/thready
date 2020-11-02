@@ -6,7 +6,7 @@ cc := gcc
 incdirs := -Iinc
 ccargscommon := -DVERSION=\"$(GIT_VERSION)\" -std=c99 -Wall -Wextra -pedantic ${incdirs}
 ccargsdebugthirdparty := ${ccargscommon} -Werror -march=native -O0 -g -c
-ccargsdebug := ${ccargsdebugthirdparty} -fprofile-arcs -ftest-coverage -fPIC -DUNIT_TESTING
+ccargsdebug := ${ccargsdebugthirdparty} -fprofile-arcs -ftest-coverage -fPIC
 ccargscentos := ${ccargscommon} -march=native -O3 -s
 linkargsdebug := -g -lgcov
 
