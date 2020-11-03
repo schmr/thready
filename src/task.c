@@ -26,11 +26,11 @@ struct task {
 
 task* task_init() {
         task* t = calloc(1, sizeof(task));
-        if (!t) {
+        if (!t) {  // GCOVR_EXCL_START
                 fprintf(stderr, "error allocating memory for task: %s\n",
                         strerror(errno));
                 exit(EXIT_FAILURE);
-        }
+        }  // GCOVR_EXCL_STOP
         return t;
 }
 

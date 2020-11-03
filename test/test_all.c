@@ -238,6 +238,16 @@ static void test_eventloop_breakable(void** state) {
         eventloop_print_result(s->evl, r);
 }
 
+static void test_eventloop_now_equals_breaktime(void** state) {
+        struct eventloopstate* s = *state;
+        int breaktime = 823;
+
+        eventloop_result r = eventloop_run(s->evl, breaktime, 1, false);
+        assert_int_equal(r, EVL_OK);
+        EVL_INT now = eventloop_get_now(s->evl);
+        assert_int_equal(now, breaktime);
+}
+
 static void test_job_allocate_ok() {
         job* j = job_init(1, 3, 4, 5, 6);
         assert_non_null(j);
@@ -320,6 +330,7 @@ static void test_jobgen_rise(void** state) {
 }
 
 static void test_jobgen_refill_all_equals_init(void** state) {
+        struct jobgenstate* statejg = *state;
         ts* tsy = ts_init();
         assert_non_null(tsy);
 
@@ -333,11 +344,12 @@ static void test_jobgen_refill_all_equals_init(void** state) {
         // TODO: Test that both states are equal, maybe can get away with
         // comparing memory range?
         for (int k = 0; k < ts_length(tsy); k++) {
-                task* t = ts_get_by_pos(tsy, k);
-                JOB_INT simtime_refill = *(s->simtime_state + k);
-                JOB_INT simtime_init = *(state->jg->simtime_state + k);
-                assert_int_equal(simtime_refill, simtime_init);
+                job* jrefill = jobgen_rise(s);
+                job* jinit = jobgen_rise(statejg->jg);
+                assert_int_equal(job_get_taskid(jinit), job_get_taskid(jrefill));
         }
+        ts_free(tsy);
+        jobgen_free(s);
 }
 
 static void test_jobgen_dump_valid(void** state) {
@@ -573,6 +585,9 @@ int main(void) {
                                             setup_eventloop_valid_edf,
                                             teardown_eventloop),
             cmocka_unit_test_setup_teardown(test_eventloop_edf_valid_runs_ok,
+                                            setup_eventloop_valid_edf,
+                                            teardown_eventloop),
+            cmocka_unit_test_setup_teardown(test_eventloop_now_equals_breaktime,
                                             setup_eventloop_valid_edf,
                                             teardown_eventloop),
             cmocka_unit_test_setup_teardown(

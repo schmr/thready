@@ -79,7 +79,7 @@ integrationtest: thready
 # Coverage
 
 coverage: test_all
-	./test_all && gcovr -r . -e inc/rnd.h -e src/pqueue.c -e src/json.c -e src/selist.c -s
+	./test_all && gcovr -r . -e inc/rnd.h -e src/pqueue.c -e src/json.c -e src/selist.c -e test/test_all.c -s
 
 # Performance test
 
