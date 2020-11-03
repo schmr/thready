@@ -32,6 +32,8 @@ static pqueue_pri_t get_pri(void* a) {
         return ((node_t*)a)->pri;
 }
 
+/* Not used in jobq, but required for pqueue interface */
+// GCOVR_EXCL_START
 static void set_pri(void* a, pqueue_pri_t pri) {
         ((node_t*)a)->pri = pri;
 }
@@ -39,6 +41,7 @@ static void set_pri(void* a, pqueue_pri_t pri) {
 static size_t get_pos(void* a) {
         return ((node_t*)a)->pos;
 }
+// GCOVR_EXCL_STOP
 
 static void set_pos(void* a, size_t pos) {
         ((node_t*)a)->pos = pos;
