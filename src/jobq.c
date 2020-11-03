@@ -46,33 +46,33 @@ static void set_pos(void* a, size_t pos) {
 
 jobq* jobq_init() {
         jobq* jq = calloc(1, sizeof(jobq));
-        if (!jq) {
+        if (!jq) {  // GCOVR_EXCL_START
                 fprintf(stderr, "error allocating memory for jobq: %s\n",
                         strerror(errno));
                 exit(EXIT_FAILURE);
-        }
+        } // GCOVR_EXCL_STOP
         jq->pq = pqueue_init(10, cmp_pri, get_pri, set_pri, get_pos, set_pos);
-        if (!jq->pq) {
+        if (!jq->pq) { // GCOVR_EXCL_START
                 fprintf(stderr, "error allocating memory for jobq\n");
                 exit(EXIT_FAILURE);
-        }
+        } // GCOVR_EXCL_STOP
         return jq;
 }
 
 void jobq_insert_by(jobq* const jq, job* const j, JOB_INT (*func)(job* const)) {
         JOB_INT pri = func(j);
         node_t* n = calloc(1, sizeof(node_t));
-        if (!n) {
+        if (!n) { // GCOVR_EXCL_START
                 fprintf(stderr, "error allocating memory for jobq node: %s\n",
                         strerror(errno));
                 exit(EXIT_FAILURE);
-        }
+        } // GCOVR_EXCL_STOP
         n->pri = pri;
         n->job = j;
-        if (pqueue_insert(jq->pq, n)) {
+        if (pqueue_insert(jq->pq, n)) { // GCOVR_EXCL_START
                 fprintf(stderr, "error inserting jobq node\n");
                 exit(EXIT_FAILURE);
-        }
+        } // GCOVR_EXCL_STOP
 }
 
 job* jobq_pop(jobq* const jq) {

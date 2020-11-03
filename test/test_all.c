@@ -212,6 +212,17 @@ static void test_eventloop_read_json_continues(void** state) {
         eventloop_dump(s->evl, stream);
         fclose(stream);
 
+
+        eventloop_free(s->evl);
+        s->evl = eventloop_init(s->jg, true);
+        /*
+        //jobgen_free(s->jg);
+        //ts_free(s->tsy);
+
+        //s->jg = jobgen_init(s->tsy, 12312, true);
+        //s->evl = eventloop_init(s->jg, true);
+        */
+
         stream = fopen("test-eventloop-read.json", "r");
         assert_true(stream);
         eventloop_read_json(s->evl, stream);
@@ -385,6 +396,8 @@ static void test_jobgen_refill_all_equals_init(void** state) {
                 job* jrefill = jobgen_rise(s);
                 job* jinit = jobgen_rise(statejg->jg);
                 assert_int_equal(job_get_taskid(jinit), job_get_taskid(jrefill));
+                job_free(jrefill);
+                job_free(jinit);
         }
         ts_free(tsy);
         jobgen_free(s);

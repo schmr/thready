@@ -52,8 +52,9 @@ eventloop* eventloop_init(jobgen* const jg, bool init) {
 }
 
 void eventloop_free(eventloop* evl) {
-        job_free(evl->nextjob);
         jobq_free(evl->pq);
+        // evl->currentjob is free'd by eventloop_run
+        job_free(evl->nextjob);
         free(evl);
 }
 

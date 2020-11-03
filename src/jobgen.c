@@ -125,7 +125,7 @@ static void refill_generator(jobgen* jg, TASK_INT taskid) {
         }
 
         // If a non-zero computation budget is defined and we can reach it by
-        // chance the task is a a high criticality task and can overrun.
+        // chance the task is a high criticality task and can overrun.
         JOB_INT c2 = task_get_comp(t, 2);
         float p0 = task_get_prob(t, 0);
         JOB_INT overruntime;
