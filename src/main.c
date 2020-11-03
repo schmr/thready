@@ -30,7 +30,7 @@ this software. If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 struct state {
         ts* tsy;
-        //struct jobgen_parameters* p;
+        // struct jobgen_parameters* p;
         jobgen* jg;
         eventloop* evl;
         FILE* tasksystem;
@@ -63,7 +63,7 @@ static void atexit_cleanup(void) {
         eventloop_free(state_reference->evl);
         jobgen_free(state_reference->jg);
         ts_free(state_reference->tsy);
-        //free(state_reference->p);
+        // free(state_reference->p);
         free(state_reference);
         state_reference = (void*)0;
 }
@@ -139,7 +139,7 @@ int main(int argc, char* argv[]) {
                         case 't':
                                 s->breaktime = atoll(ps.optarg);
                                 break;
-                        case 'w': // Processor speed; work done per timestep
+                        case 'w':  // Processor speed; work done per timestep
                                 s->speed = atoll(ps.optarg);
                                 break;
                         case '?':
@@ -214,7 +214,8 @@ int main(int argc, char* argv[]) {
                 // Nothing to simulate
                 r = EVL_PASS;
         } else {
-                r = eventloop_run(s->evl, s->breaktime, s->speed, s->overrunbreak);
+                r = eventloop_run(s->evl, s->breaktime, s->speed,
+                                  s->overrunbreak);
         }
 
         // Dump results

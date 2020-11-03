@@ -45,7 +45,7 @@ jobgen* jobgen_init(ts const* const tasksystem, uint32_t seed, bool refill) {
                 jgen->pcg = calloc(1, sizeof(rnd_pcg_t*));
                 if (jgen->pcg) {
                         *(jgen->pcg) = calloc(1, sizeof(rnd_pcg_t));
-                        if (!*(jgen->pcg)) { //GCOVR_EXCL_START
+                        if (!*(jgen->pcg)) {  // GCOVR_EXCL_START
                                 fprintf(stderr,
                                         "error allocating memory for jobgen\n");
                                 exit(EXIT_FAILURE);
@@ -53,12 +53,12 @@ jobgen* jobgen_init(ts const* const tasksystem, uint32_t seed, bool refill) {
                 } else {
                         fprintf(stderr, "error allocating memory for jobgen\n");
                         exit(EXIT_FAILURE);
-                } //GCOVR_EXCL_STOP
+                }  // GCOVR_EXCL_STOP
                 rnd_pcg_seed(*(jgen->pcg), seed);
-        } else { //GCOVR_EXCL_START
+        } else {  // GCOVR_EXCL_START
                 fprintf(stderr, "error allocating memory for jobgen\n");
                 exit(EXIT_FAILURE);
-        } //GCOVR_EXCL_STOP
+        }  // GCOVR_EXCL_STOP
 
         if (refill) {
                 for (int k = 0; k < ts_length(tasksystem); k++) {
@@ -124,7 +124,8 @@ static void refill_generator(jobgen* jg, TASK_INT taskid) {
                         taskid, alpha, deadline, gamma, (gamma - c1));
         }
 
-        // If a non-zero computation budget is defined and we can reach it by chance the task is a a high criticality task and can overrun.
+        // If a non-zero computation budget is defined and we can reach it by
+        // chance the task is a a high criticality task and can overrun.
         JOB_INT c2 = task_get_comp(t, 2);
         float p0 = task_get_prob(t, 0);
         JOB_INT overruntime;
@@ -132,7 +133,8 @@ static void refill_generator(jobgen* jg, TASK_INT taskid) {
                 overruntime = alpha + c1 + 1;
         } else {
                 // Overruntime beyond deadline is not put to use by eventloop.
-                // This effectively sets the overruntime to "not available" or irrelevant.
+                // This effectively sets the overruntime to "not available" or
+                // irrelevant.
                 overruntime = deadline + 1;
         }
 
@@ -150,21 +152,20 @@ job* jobgen_rise(jobgen* jg) {
         return j;
 }
 void jobgen_refill_all(jobgen* jg) {
-                int n = ts_length(jg->tsy);
-                for (int i = 0; i < n; i++) {
-                                task* t = ts_get_by_pos(jg->tsy, i);
-                                TASK_INT tid = task_get_id(t);
-                                refill_generator(jg, tid);
-                        }
+        int n = ts_length(jg->tsy);
+        for (int i = 0; i < n; i++) {
+                task* t = ts_get_by_pos(jg->tsy, i);
+                TASK_INT tid = task_get_id(t);
+                refill_generator(jg, tid);
         }
-
+}
 
 void jobgen_set_simtime(jobgen* jg, JOB_INT* simtimes, int len) {
         int tasks = ts_length(jg->tsy);
-        if (tasks != len) { // GCOVR_EXCL_START
+        if (tasks != len) {  // GCOVR_EXCL_START
                 fprintf(stderr, "can't seed simtimes due to length mismatch\n");
                 exit(EXIT_FAILURE);
-        } // GCOVR_EXCL_STOP
+        }  // GCOVR_EXCL_STOP
         for (int i = 0; i < tasks; i++) {
                 *(jg->simtime_state + i) = *(simtimes + i);
         }

@@ -95,7 +95,7 @@ thready-performance-benchmark.csv: thready
 # Documentation
 
 format:
-	find . \( -name \*.c -or -name \*.h \) | xargs -n12 -P4 clang-format -style="{BasedOnStyle: Chromium, IndentWidth: 8}" -i
+	find . \( -name \*.c -or -name \*.h \) | xargs -n12 -P4 clang-format -style="{BasedOnStyle: Chromium, IndentWidth: 8, IncludeBlocks: Preserve}" -i
 
 
 documentation: Doxyfile

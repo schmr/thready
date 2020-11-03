@@ -105,7 +105,9 @@ static void selist_to_ts(ts* tsy, struct selist** l) {
         /* At least some sanity checking... */
         int len = selist_length(*l);
         if (len % TASK_NUM_PARAM) {
-                fprintf(stderr, "task system ill defined: json contains %d values\n", len);
+                fprintf(stderr,
+                        "task system ill defined: json contains %d values\n",
+                        len);
                 exit(EXIT_FAILURE);
         }
         int i = 0;

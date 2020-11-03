@@ -61,7 +61,10 @@ EVL_INT eventloop_get_now(eventloop* evl) {
         return evl->now;
 }
 
-eventloop_result eventloop_run(eventloop* evl, JOB_INT breaktime, JOB_INT speed, bool overrunbreak) {
+eventloop_result eventloop_run(eventloop* evl,
+                               JOB_INT breaktime,
+                               JOB_INT speed,
+                               bool overrunbreak) {
         // Initialize local pointers, now is set to starttime of current job
         // by initialization of eventloop, and currentjob is added to scheduler
         // queue.
@@ -84,8 +87,8 @@ eventloop_result eventloop_run(eventloop* evl, JOB_INT breaktime, JOB_INT speed,
                         overruntime = job_get_overruntime(currentjob);
                 } else {
                         // If there is no job in scheduler queue,
-                        // disable overrun checking with dummy overrun time which
-                        // is too late to be considered.
+                        // disable overrun checking with dummy overrun time
+                        // which is too late to be considered.
                         overruntime = arrival + 123;
                 }
                 if (overrunbreak && (overruntime < arrival)) {
@@ -104,8 +107,10 @@ eventloop_result eventloop_run(eventloop* evl, JOB_INT breaktime, JOB_INT speed,
                                 job_set_computation(currentjob, c - workdelta);
                                 runtime = 0;
                         } else {  // Finish job and update runtime budget
-                                JOB_INT time_spent = c / speed; // truncation is optimistic
-                                if (c % speed > 0) { // conservative; wasting some capacity
+                                JOB_INT time_spent =
+                                    c / speed;  // truncation is optimistic
+                                if (c % speed >
+                                    0) {  // conservative; wasting some capacity
                                         runtime -= 1;
                                         evl->now += 1;
                                 }
@@ -261,7 +266,8 @@ void eventloop_read_json(eventloop* evl, FILE* stream) {
                 intmax_t* overruntime = selist_get(l, i++);
                 intmax_t* deadline = selist_get(l, i++);
                 intmax_t* computation = selist_get(l, i++);
-                job* j = job_init(*taskid, *starttime, *overruntime, *deadline, *computation);
+                job* j = job_init(*taskid, *starttime, *overruntime, *deadline,
+                                  *computation);
                 if (*starttime > *now) {
                         jobq_insert_by(generator, j, job_get_starttime);
                         int k = ts_get_pos_by_id(tsy, *taskid);
