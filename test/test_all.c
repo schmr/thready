@@ -329,6 +329,26 @@ static void test_jobgen_rise(void** state) {
 	}
 }
 
+static void test_jobgen_refill_all_equals_init(void** state) {
+        ts* tsy = ts_init();
+        assert_non_null(tsy);
+
+        FILE* stream = fopen("test/ts.json", "r");
+        assert_non_null(stream);
+        ts_read_json(tsy, stream);
+        fclose(stream);
+
+	jobgen* s = jobgen_init(tsy, 12312, false);
+        jobgen_refill_all(s);
+        // TODO: Test that both states are equal, maybe can get away with comparing memory range?
+        for (int k = 0; k < ts_length(tsy); k++) {
+                task* t = ts_get_by_pos(tsy, k);
+                JOB_INT simtime_refill = *(s->simtime_state + k);
+                JOB_INT simtime_init = *(state->jg->simtime_state + k);
+                assert_int_equal(simtime_refill, simtime_init);
+        }
+}
+
 
 static void test_jobgen_dump_valid(void** state) {
 	struct jobgenstate* s = *state;
@@ -552,6 +572,9 @@ int main(void) {
 						setup_jobgen,
 						teardown_jobgen),
 		cmocka_unit_test_setup_teardown(test_jobgen_rise,
+						setup_jobgen,
+						teardown_jobgen),
+		cmocka_unit_test_setup_teardown(test_jobgen_refill_all_equals_init,
 						setup_jobgen,
 						teardown_jobgen),
 		cmocka_unit_test_setup_teardown(test_jobgen_dump_valid,

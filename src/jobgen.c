@@ -45,7 +45,7 @@ jobgen* jobgen_init(ts const* const tasksystem, uint32_t seed, bool refill) {
                 jgen->pcg = calloc(1, sizeof(rnd_pcg_t*));
                 if (jgen->pcg) {
                         *(jgen->pcg) = calloc(1, sizeof(rnd_pcg_t));
-                        if (!*(jgen->pcg)) {
+                        if (!*(jgen->pcg)) { //GCOVR_EXCL_START
                                 fprintf(stderr,
                                         "error allocating memory for jobgen\n");
                                 exit(EXIT_FAILURE);
@@ -53,12 +53,12 @@ jobgen* jobgen_init(ts const* const tasksystem, uint32_t seed, bool refill) {
                 } else {
                         fprintf(stderr, "error allocating memory for jobgen\n");
                         exit(EXIT_FAILURE);
-                }
+                } //GCOVR_EXCL_STOP
                 rnd_pcg_seed(*(jgen->pcg), seed);
-        } else {
+        } else { //GCOVR_EXCL_START
                 fprintf(stderr, "error allocating memory for jobgen\n");
                 exit(EXIT_FAILURE);
-        }
+        } //GCOVR_EXCL_STOP
 
         if (refill) {
                 for (int k = 0; k < ts_length(tasksystem); k++) {
@@ -142,15 +142,6 @@ static void refill_generator(jobgen* jg, TASK_INT taskid) {
         jobq_insert_by(jg->jq, job, job_get_starttime);
 }
 
-void jobgen_refill_all(jobgen* jg) {
-        int n = ts_length(jg->tsy);
-        for (int i = 0; i < n; i++) {
-                task* t = ts_get_by_pos(jg->tsy, i);
-                TASK_INT tid = task_get_id(t);
-                refill_generator(jg, tid);
-        }
-}
-
 job* jobgen_rise(jobgen* jg) {
         job* j = jobq_pop(jg->jq);
         if (j) {  // mission still running, generator not exhausted
@@ -158,13 +149,22 @@ job* jobgen_rise(jobgen* jg) {
         }
         return j;
 }
+void jobgen_refill_all(jobgen* jg) {
+                int n = ts_length(jg->tsy);
+                for (int i = 0; i < n; i++) {
+                                task* t = ts_get_by_pos(jg->tsy, i);
+                                TASK_INT tid = task_get_id(t);
+                                refill_generator(jg, tid);
+                        }
+        }
+
 
 void jobgen_set_simtime(jobgen* jg, JOB_INT* simtimes, int len) {
         int tasks = ts_length(jg->tsy);
-        if (tasks != len) {
+        if (tasks != len) { // GCOVR_EXCL_START
                 fprintf(stderr, "can't seed simtimes due to length mismatch\n");
                 exit(EXIT_FAILURE);
-        }
+        } // GCOVR_EXCL_STOP
         for (int i = 0; i < tasks; i++) {
                 *(jg->simtime_state + i) = *(simtimes + i);
         }
