@@ -44,10 +44,10 @@ eventloop* eventloop_init(jobgen* const jg, bool init) {
                         evl->jobs_done = 0;
                         evl->events_done = 0;
                 }
-        } else { // GCOVR_EXCL_START
+        } else {  // GCOVR_EXCL_START
                 fprintf(stderr, "error allocating memory for eventloop\n");
                 exit(EXIT_FAILURE);
-        } // GCOVR_EXCL_STOP
+        }  // GCOVR_EXCL_STOP
         return evl;
 }
 
@@ -254,11 +254,11 @@ void eventloop_read_json(eventloop* evl, FILE* stream) {
         jobq* scheduler = jobq_init();
         jobq* generator = jobq_init();
         JOB_INT* simtimes = calloc(ts_length(tsy), sizeof(JOB_INT));
-        if (!simtimes) { //GCOVR_EXCL_START
+        if (!simtimes) {  // GCOVR_EXCL_START
                 fprintf(stderr,
                         "error allocating memory while restoring state\n");
                 exit(EXIT_FAILURE);
-        } // GCOVR_EXCL_STOP
+        }                               // GCOVR_EXCL_STOP
         while (i < selist_length(l)) {  // skipped if no job in list due to drop
                 // Recreate job from list with knowledge about order,
                 // sorry future me/others!

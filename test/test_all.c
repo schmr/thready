@@ -395,7 +395,8 @@ static void test_jobgen_refill_all_equals_init(void** state) {
         for (int k = 0; k < ts_length(tsy); k++) {
                 job* jrefill = jobgen_rise(s);
                 job* jinit = jobgen_rise(statejg->jg);
-                assert_int_equal(job_get_taskid(jinit), job_get_taskid(jrefill));
+                assert_int_equal(job_get_taskid(jinit),
+                                 job_get_taskid(jrefill));
                 job_free(jrefill);
                 job_free(jinit);
         }
@@ -613,7 +614,7 @@ int main(void) {
             cmocka_unit_test_setup_teardown(test_jobgen_rise, setup_jobgen,
                                             teardown_jobgen),
             cmocka_unit_test_setup_teardown(test_jobgen_rise_deterministic,
-                            setup_jobgen_deterministic,
+                                            setup_jobgen_deterministic,
                                             teardown_jobgen),
             cmocka_unit_test_setup_teardown(test_jobgen_refill_all_equals_init,
                                             setup_jobgen, teardown_jobgen),
@@ -653,7 +654,7 @@ int main(void) {
             // cmocka_unit_test_setup_teardown(test_eventloop_dump_valid,
             //				setup_eventloop_valid_edf,
             //				teardown_eventloop),
-            //cmocka_unit_test_setup_teardown(test_eventloop_read_json_continues,
+            // cmocka_unit_test_setup_teardown(test_eventloop_read_json_continues,
             //                                setup_eventloop_valid_edf,
             //                                teardown_eventloop),
             cmocka_unit_test_setup_teardown(test_eventloop_breakable,
