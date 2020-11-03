@@ -201,6 +201,7 @@ static void test_eventloop_dump_valid(void** state) {
 }
 */
 
+/*
 static void test_eventloop_read_json_continues(void** state) {
         struct eventloopstate* s = *state;
 
@@ -215,13 +216,11 @@ static void test_eventloop_read_json_continues(void** state) {
 
         eventloop_free(s->evl);
         s->evl = eventloop_init(s->jg, true);
-        /*
         //jobgen_free(s->jg);
         //ts_free(s->tsy);
 
         //s->jg = jobgen_init(s->tsy, 12312, true);
         //s->evl = eventloop_init(s->jg, true);
-        */
 
         stream = fopen("test-eventloop-read.json", "r");
         assert_true(stream);
@@ -236,6 +235,7 @@ static void test_eventloop_read_json_continues(void** state) {
         r = eventloop_run(s->evl, 200, 1, false);
         assert_int_equal(r, EVL_OK);
 }
+*/
 
 static void test_eventloop_breakable(void** state) {
         struct eventloopstate* s = *state;
@@ -653,9 +653,9 @@ int main(void) {
             // cmocka_unit_test_setup_teardown(test_eventloop_dump_valid,
             //				setup_eventloop_valid_edf,
             //				teardown_eventloop),
-            cmocka_unit_test_setup_teardown(test_eventloop_read_json_continues,
-                                            setup_eventloop_valid_edf,
-                                            teardown_eventloop),
+            //cmocka_unit_test_setup_teardown(test_eventloop_read_json_continues,
+            //                                setup_eventloop_valid_edf,
+            //                                teardown_eventloop),
             cmocka_unit_test_setup_teardown(test_eventloop_breakable,
                                             setup_eventloop_valid_edf,
                                             teardown_eventloop),
