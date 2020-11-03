@@ -68,7 +68,7 @@ test_all: test_all.o ts.o task.o selist.o rnd.o stats.o json.o job.o jobgen.o jo
 
 unittest: test_all
 	./test_all
-	valgrind --quiet --leak-check=full --leak-resolution=high --exit-on-first-error=yes --log-file=/dev/null ./test_all
+	valgrind --quiet --leak-check=full --leak-resolution=high --error-exitcode=1 --exit-on-first-error=yes --log-file=/dev/null ./test_all
 
 
 integrationtest: thready
