@@ -306,6 +306,28 @@ int setup_jobgen(void** state) {
         return 0;
 }
 
+int setup_jobgen_deterministic(void** state) {
+        struct jobgenstate* s = calloc(1, sizeof(struct jobgenstate));
+        if (!s) {
+                return 1;
+        }
+
+        s->tsy = ts_init();
+
+        FILE* stream = fopen("test/ts-deterministic.json", "r");
+        if (stream) {
+                ts_read_json(s->tsy, stream);
+                fclose(stream);
+        } else {
+                return 1;
+        }
+
+        s->jg = jobgen_init(s->tsy, 978382, true);
+
+        *state = s;
+        return 0;
+}
+
 int teardown_jobgen(void** state) {
         struct jobgenstate* s = *state;
         jobgen_free(s->jg);
@@ -325,6 +347,22 @@ static void test_jobgen_rise(void** state) {
                 job* j = jobgen_rise(s->jg);
                 assert_in_range(job_get_computation(j), 1, 10);
                 assert_in_range(job_get_taskid(j) + 1, 0, 6);
+                job_free(j);
+        }
+}
+
+static void test_jobgen_rise_deterministic(void** state) {
+        struct jobgenstate* s = *state;
+        for (int i = 0; i < 1024; i++) {
+                job* j = jobgen_rise(s->jg);
+                assert_int_equal(job_get_computation(j), 3);
+                assert_int_equal(job_get_taskid(j), 19);
+                int starttime = i * 7;
+                int deadline = starttime + 7;
+                int dummy_overruntime = deadline + 1;
+                assert_int_equal(job_get_starttime(j), starttime);
+                assert_int_equal(job_get_deadline(j), deadline);
+                assert_int_equal(job_get_overruntime(j), dummy_overruntime);
                 job_free(j);
         }
 }
@@ -560,6 +598,9 @@ int main(void) {
             cmocka_unit_test_setup_teardown(test_jobgen_persistent,
                                             setup_jobgen, teardown_jobgen),
             cmocka_unit_test_setup_teardown(test_jobgen_rise, setup_jobgen,
+                                            teardown_jobgen),
+            cmocka_unit_test_setup_teardown(test_jobgen_rise_deterministic,
+                            setup_jobgen_deterministic,
                                             teardown_jobgen),
             cmocka_unit_test_setup_teardown(test_jobgen_refill_all_equals_init,
                                             setup_jobgen, teardown_jobgen),

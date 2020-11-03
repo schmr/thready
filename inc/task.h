@@ -58,7 +58,7 @@ typedef struct task task;
  * The jobs of task 0 rise with the period,
  * or to be precise,
  * the probability of an arrival later than the minimum period is incredible low
- * (for task 0 the probability would be 1.384e-87).
+ * (for task 0 the probability would be 37.2e-45).
  *
  * Task 1 has a period and relative deadline of 20,
  * and the computation demand is 1 with a probability of 0.9,
@@ -67,7 +67,7 @@ typedef struct task task;
  * The jobs of task 1 rise on average 0.25 period after the minimum period.
  *
  *     [
- *             [0,5,5, 1,4, 0,0,  0,0, 1.0,0.0, 1000.0],
+ *             [0,5,5, 1,4, 0,0,  0,0, 1.0,0.0, 0.01],
  *             [1,20,20, 1,1, 2,4,  5,8, 0.9,0.09, 4.0],
  *             [2,20,20, 1,2, 3,4,  5,8, 0.9,0.09, 4.0]
  *     ]
