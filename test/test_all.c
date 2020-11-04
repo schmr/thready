@@ -142,6 +142,48 @@ int setup_eventloop_invalid_edf(void** state) {
         return 0;
 }
 
+int setup_eventloop_deterministic_edf(void** state) {
+        struct eventloopstate* s = calloc(1, sizeof(struct eventloopstate));
+        if (!s) {
+                return 1;
+        }
+
+        s->tsy = ts_init();
+        FILE* tasksystem = fopen("test/ts-deterministic.json", "r");
+        if (!tasksystem) {
+                return 1;
+        }
+        ts_read_json(s->tsy, tasksystem);
+        fclose(tasksystem);
+
+        s->jg = jobgen_init(s->tsy, 12312, true);
+        s->evl = eventloop_init(s->jg, true);
+
+        *state = s;
+        return 0;
+}
+
+int setup_eventloop_deterministic_edf_overrun(void** state) {
+        struct eventloopstate* s = calloc(1, sizeof(struct eventloopstate));
+        if (!s) {
+                return 1;
+        }
+
+        s->tsy = ts_init();
+        FILE* tasksystem = fopen("test/ts-deterministic-overrun.json", "r");
+        if (!tasksystem) {
+                return 1;
+        }
+        ts_read_json(s->tsy, tasksystem);
+        fclose(tasksystem);
+
+        s->jg = jobgen_init(s->tsy, 12312, true);
+        s->evl = eventloop_init(s->jg, true);
+
+        *state = s;
+        return 0;
+}
+
 int teardown_eventloop(void** state) {
         struct eventloopstate* s = *state;
         eventloop_free(s->evl);
@@ -167,6 +209,20 @@ static void test_eventloop_edf_invalid_runs_deadlinemiss(void** state) {
         struct eventloopstate* s = *state;
         eventloop_result r = eventloop_run(s->evl, 9273, 1, false);
         assert_int_equal(r, EVL_DEADLINEMISS);
+        eventloop_print_result(s->evl, r);
+}
+
+static void test_eventloop_edf_deterministic_cant_overrun(void** state) {
+        struct eventloopstate* s = *state;
+        eventloop_result r = eventloop_run(s->evl, 9273, 1, true);
+        assert_int_equal(r, EVL_OK);
+        eventloop_print_result(s->evl, r);
+}
+
+static void test_eventloop_edf_deterministic_overrun(void** state) {
+        struct eventloopstate* s = *state;
+        eventloop_result r = eventloop_run(s->evl, 9273, 1, true);
+        assert_int_equal(r, EVL_OVERRUN);
         eventloop_print_result(s->evl, r);
 }
 
@@ -718,6 +774,12 @@ int main(void) {
             cmocka_unit_test_setup_teardown(
                 test_eventloop_edf_invalid_runs_deadlinemiss,
                 setup_eventloop_invalid_edf, teardown_eventloop),
+            cmocka_unit_test_setup_teardown(
+                test_eventloop_edf_deterministic_overrun,
+                setup_eventloop_deterministic_edf_overrun, teardown_eventloop),
+            cmocka_unit_test_setup_teardown(
+                test_eventloop_edf_deterministic_cant_overrun,
+                setup_eventloop_deterministic_edf, teardown_eventloop),
             cmocka_unit_test_setup_teardown(test_eventloop_stepable,
                                             setup_eventloop_valid_edf,
                                             teardown_eventloop),
