@@ -352,6 +352,64 @@ static void test_jobgen_persistent(void** state) {
         assert_non_null(s->jg);
 }
 
+static void test_jobgen_dump(void** state) {
+        struct jobgenstate* s = *state;
+
+        void** dst;
+        int dumped_jobs = jobgen_dump(s->jg, &dst);
+        job** jp = (job**)dst;
+        assert_int_equal(dumped_jobs, 1);
+        assert_int_equal(job_get_starttime(*jp), 0);
+        free(dst);
+
+        job* j = jobgen_rise(s->jg);
+        assert_int_equal(job_get_starttime(j), 0);
+        job_free(j);
+
+        dumped_jobs = jobgen_dump(s->jg, &dst);
+        jp = (job**)dst;
+        assert_int_equal(dumped_jobs, 1);
+        assert_int_equal(job_get_starttime(*jp), 7);
+        free(dst);
+}
+
+static void test_jobgen_set_simtime(void** state) {
+        struct jobgenstate* s = *state;
+
+        jobgen_free(s->jg);
+        s->jg = jobgen_init(s->tsy, 129371, false);
+        JOB_INT simtime = 9001;
+        jobgen_set_simtime(s->jg, &simtime, 1);
+        jobgen_refill_all(s->jg);
+
+        void** dst;
+        int dumped_jobs = jobgen_dump(s->jg, &dst);
+        job** jp = (job**)dst;
+        assert_int_equal(dumped_jobs, 1);
+        assert_int_equal(job_get_starttime(*jp), 9001);
+        free(dst);
+}
+
+static void test_jobgen_get_tasksystem(void ** state) {
+        struct jobgenstate* s = *state;
+
+        task* t = ts_get_by_pos(s->tsy, 0);
+        ts const* tsyjg = jobgen_get_tasksystem(s->jg);
+        task* tjg = ts_get_by_pos(tsyjg, 0);
+        assert_int_equal(task_get_id(t), task_get_id(tjg));
+        assert_int_equal(task_get_period(t), task_get_period(tjg));
+        assert_int_equal(task_get_reldead(t), task_get_reldead(tjg));
+        assert_int_equal(task_get_comp(t, 0), task_get_comp(tjg, 0));
+}
+
+static void test_jobgen_replace_jobq(void** state) {
+        struct jobgenstate* s = *state;
+        jobq* emptyjq = jobq_init();
+        jobgen_replace_jobq(s->jg, emptyjq);
+        job* j = jobgen_rise(s->jg);
+        assert_null(j);
+}
+
 static void test_jobgen_rise(void** state) {
         struct jobgenstate* s = *state;
         for (int i = 0; i < 10; i++) {
@@ -612,6 +670,18 @@ int main(void) {
             cmocka_unit_test_setup_teardown(test_jobgen_persistent,
                                             setup_jobgen, teardown_jobgen),
             cmocka_unit_test_setup_teardown(test_jobgen_rise, setup_jobgen,
+                                            teardown_jobgen),
+            cmocka_unit_test_setup_teardown(test_jobgen_set_simtime,
+                                            setup_jobgen_deterministic,
+                                            teardown_jobgen),
+            cmocka_unit_test_setup_teardown(test_jobgen_get_tasksystem,
+                                            setup_jobgen_deterministic,
+                                            teardown_jobgen),
+            cmocka_unit_test_setup_teardown(test_jobgen_dump,
+                                            setup_jobgen_deterministic,
+                                            teardown_jobgen),
+            cmocka_unit_test_setup_teardown(test_jobgen_replace_jobq,
+                                            setup_jobgen_deterministic,
                                             teardown_jobgen),
             cmocka_unit_test_setup_teardown(test_jobgen_rise_deterministic,
                                             setup_jobgen_deterministic,
