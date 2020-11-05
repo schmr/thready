@@ -301,6 +301,7 @@ void eventloop_read_json(eventloop* evl, FILE* stream) {
         evl->pq = scheduler;
         jobgen_set_simtime(evl->jg, simtimes, ts_length(tsy));
         jobgen_replace_jobq(evl->jg, generator);
+        /* This is unused legacy code?
         if (i == 1) {  // we dropped everything
                 // simtimes are all zero, need to set them to current
                 // missiontime
@@ -310,6 +311,7 @@ void eventloop_read_json(eventloop* evl, FILE* stream) {
                 jobgen_set_simtime(evl->jg, simtimes, ts_length(tsy));
                 jobgen_refill_all(evl->jg);
         }
+        */
         // It is perfectly fine to raise NULL if no job is due because we might
         // already have passed beyond the mission duration, which would prevent
         // the generator from creating new jobs.
