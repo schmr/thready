@@ -47,6 +47,7 @@ int setup_dumpstate(void** state) {
         s->dst = calloc(n, sizeof(void*));
         if (s->src && s->dst) {
                 for (int i = 0; i < n; i++) {
+                        /* Set up two int* arrays, pointed data is i or 2*i */
                         int* a = calloc(1, sizeof(int));
                         int* b = calloc(1, sizeof(int));
                         if (a && b) {
@@ -99,6 +100,33 @@ static void test_dump_uniq_valid(void** state) {
         free(m);
         free(u);
 }
+
+
+static void test_dump_json_tostream(void** state) {
+        struct dumpstate* s = *state;
+
+        FILE* stream = fopen("test_dump_json_tostream.json", "w");
+        if (!stream) { fail_msg("Could not open file for testing!\n"); }
+        json_printer* jp = dump_json_tostream_init(stream);
+        for (int i = 0; i < s->n; i++) {
+                int* p = (int*)*(s->src + i);
+                dump_json_tostream(jp, (int64_t)(*p));
+        }
+        dump_json_tostream_free(jp);
+
+        stream = freopen(NULL, "r", stream);
+        if (!stream) { fail_msg("Could not reopen file for testing!\n"); }
+        char* buf = calloc(2*s->n, sizeof(char));
+        if (!buf) { fail_msg("Could not allocate buffer memory!\n"); }
+        *(buf + 2*s->n -1) = 0;
+        char gld[] = "0,1,2,3,4,5,6,7,8,9";
+        size_t rb = fread(buf, sizeof(char), 2*(s->n) - 1, stream);
+        if (!rb) { fail_msg("Could not read file for testing!\n"); }
+        assert_string_equal(buf, gld);
+        free(buf);
+        fclose(stream);
+}
+
 
 int setup_eventloop_valid_edf(void** state) {
         struct eventloopstate* s = calloc(1, sizeof(struct eventloopstate));
@@ -762,6 +790,8 @@ int main(void) {
                 test_dump_merge_valid, setup_dumpstate, teardown_dumpstate),
             cmocka_unit_test_setup_teardown(
                 test_dump_uniq_valid, setup_dumpstate, teardown_dumpstate),
+            cmocka_unit_test_setup_teardown(
+                test_dump_json_tostream, setup_dumpstate, teardown_dumpstate),
             cmocka_unit_test_setup_teardown(test_eventloop_persistent,
                                             setup_eventloop_valid_edf,
                                             teardown_eventloop),
