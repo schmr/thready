@@ -66,6 +66,9 @@ eventloop_result eventloop_run(eventloop* evl,
                                JOB_INT breaktime,
                                JOB_INT speed,
                                bool overrunbreak) {
+        if (breaktime <= evl->now) {
+                return EVL_PASS;  // Nothing to simulate
+        }
         // Initialize local pointers, now is set to starttime of current job
         // by initialization of eventloop, and currentjob is added to scheduler
         // queue.
@@ -188,8 +191,9 @@ void eventloop_print_result(eventloop const* const evl,
                         fprintf(stdout, "%" PRId64 ": Pass simulation\n",
                                 (int64_t)(evl->now));
                         break;
-                default:
+                default: // GCOVR_EXCL_START
                         break;
+                        // GCOVR_EXCL_STOP
         }
 }
 

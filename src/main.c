@@ -209,14 +209,8 @@ int main(int argc, char* argv[]) {
                 exit(EXIT_FAILURE);
         }
 
-        eventloop_result r;
-        if (s->breaktime <= eventloop_get_now(s->evl)) {
-                // Nothing to simulate
-                r = EVL_PASS;
-        } else {
-                r = eventloop_run(s->evl, s->breaktime, s->speed,
+        eventloop_result r = eventloop_run(s->evl, s->breaktime, s->speed,
                                   s->overrunbreak);
-        }
 
         // Dump results
         char fname[FILENAMEMAXLEN] = {0};

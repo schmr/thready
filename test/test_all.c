@@ -226,6 +226,23 @@ static void test_eventloop_persistent(void** state) {
         assert_non_null(s->evl);
 }
 
+static void test_eventloop_run_speed(void** state) {
+        struct eventloopstate* s = *state;
+        eventloop_result r = eventloop_run(s->evl, 27, 1, false);
+        assert_int_equal(r, EVL_OK);
+        r = eventloop_run(s->evl, 87, 2, false);
+        assert_int_equal(r, EVL_OK);
+}
+
+static void test_eventloop_run_pass(void** state) {
+        struct eventloopstate* s = *state;
+        eventloop_result r = eventloop_run(s->evl, 27, 1, false);
+        assert_int_equal(r, EVL_OK);
+        r = eventloop_run(s->evl, 11, 1, false);
+        assert_int_equal(r, EVL_PASS);
+        eventloop_print_result(s->evl, r);
+}
+
 static void test_eventloop_edf_valid_runs_ok(void** state) {
         struct eventloopstate* s = *state;
         eventloop_result r = eventloop_run(s->evl, 213, 1, false);
@@ -258,9 +275,11 @@ static void test_eventloop_stepable(void** state) {
         struct eventloopstate* s = *state;
 
         eventloop_result r;
+        const LargestIntegralType expected[] = { EVL_OK, EVL_PASS };
         for (int i = 0; i < 153; i++) {
                 r = eventloop_run(s->evl, i, 1, false);
-                assert_int_equal(r, EVL_OK);
+                //assert_int_equal(r, EVL_OK);
+                assert_in_set(r, expected, 2);
         }
         eventloop_print_result(s->evl, r);
 }
@@ -326,9 +345,10 @@ static void test_eventloop_breakable(void** state) {
 
         eventloop_result r = eventloop_run(s->evl, 300, 1, false);
         assert_int_equal(r, EVL_OK);
+        const LargestIntegralType expected[] = { EVL_OK, EVL_PASS };
         for (int i = 0; i < 353; i++) {
                 r = eventloop_run(s->evl, i, 1, false);
-                assert_int_equal(r, EVL_OK);
+                assert_in_set(r, expected, 2);
         }
         eventloop_print_result(s->evl, r);
 }
@@ -809,6 +829,12 @@ int main(void) {
                 setup_eventloop_deterministic_edf_overrun, teardown_eventloop),
             cmocka_unit_test_setup_teardown(
                 test_eventloop_edf_deterministic_cant_overrun,
+                setup_eventloop_deterministic_edf, teardown_eventloop),
+            cmocka_unit_test_setup_teardown(
+                test_eventloop_run_speed,
+                setup_eventloop_deterministic_edf, teardown_eventloop),
+            cmocka_unit_test_setup_teardown(
+                test_eventloop_run_pass,
                 setup_eventloop_deterministic_edf, teardown_eventloop),
             cmocka_unit_test_setup_teardown(test_eventloop_stepable,
                                             setup_eventloop_valid_edf,
