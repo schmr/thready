@@ -314,23 +314,33 @@ static void test_eventloop_read_json_continues(void** state) {
         eventloop_dump(s->evl, stream);
         fclose(stream);
 
+        stream = fopen("test-eventloop-read2.json", "w");
+        assert_true(stream);
+        eventloop_dump(s->evl, stream);
+        fclose(stream);
+
+        // Assert that dumping twice results in same file content
+        char block[1024];
+        char golden[] = "{\"now\":100,\"jobs\":[[19,112,120,119,3],[19,98,106,105,1]]}";
+        int len;
+
+        stream = fopen("test-eventloop-read.json", "r");
+        len = fread(&block, sizeof(char), 1024, stream);
+        fclose(stream);
+        assert_memory_equal(&block, &golden, len);
+
+        stream = fopen("test-eventloop-read.json", "r");
+        len = fread(&block, sizeof(char), 1024, stream);
+        fclose(stream);
+        assert_memory_equal(&block, &golden, len);
+
 
         eventloop_free(s->evl);
         s->evl = eventloop_init(s->jg, false);
-        //jobgen_free(s->jg);
-        //ts_free(s->tsy);
-
-        //s->jg = jobgen_init(s->tsy, 12312, true);
-        //s->evl = eventloop_init(s->jg, true);
 
         stream = fopen("test-eventloop-read.json", "r");
         assert_true(stream);
         eventloop_read_json(s->evl, stream);
-        fclose(stream);
-
-        stream = fopen("test-eventloop-read2.json", "w");
-        assert_true(stream);
-        eventloop_dump(s->evl, stream);
         fclose(stream);
 
         r = eventloop_run(s->evl, 200, 1, false);
