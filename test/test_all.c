@@ -284,7 +284,6 @@ static void test_eventloop_stepable(void** state) {
         eventloop_print_result(s->evl, r);
 }
 
-/*
 static void test_eventloop_dump_valid(void** state) {
         struct eventloopstate* s = *state;
 
@@ -296,15 +295,14 @@ static void test_eventloop_dump_valid(void** state) {
         stream = fopen("test-eventloop-dump-valid.json", "r");
         if (stream) {
                 char block[1024];
+                char golden[] = "{\"now\":0,\"jobs\":[[19,14,22,21,3],[19,0,8,7,3]]}";
                 int len;
                 len = fread(&block, sizeof(char), 1024, stream);
                 fclose(stream);
                 assert_memory_equal(&block, &golden, len);
         }
 }
-*/
 
-/*
 static void test_eventloop_read_json_continues(void** state) {
         struct eventloopstate* s = *state;
 
@@ -318,7 +316,7 @@ static void test_eventloop_read_json_continues(void** state) {
 
 
         eventloop_free(s->evl);
-        s->evl = eventloop_init(s->jg, true);
+        s->evl = eventloop_init(s->jg, false);
         //jobgen_free(s->jg);
         //ts_free(s->tsy);
 
@@ -338,7 +336,6 @@ static void test_eventloop_read_json_continues(void** state) {
         r = eventloop_run(s->evl, 200, 1, false);
         assert_int_equal(r, EVL_OK);
 }
-*/
 
 static void test_eventloop_breakable(void** state) {
         struct eventloopstate* s = *state;
@@ -839,12 +836,12 @@ int main(void) {
             cmocka_unit_test_setup_teardown(test_eventloop_stepable,
                                             setup_eventloop_valid_edf,
                                             teardown_eventloop),
-            // cmocka_unit_test_setup_teardown(test_eventloop_dump_valid,
-            //				setup_eventloop_valid_edf,
-            //				teardown_eventloop),
-            // cmocka_unit_test_setup_teardown(test_eventloop_read_json_continues,
-            //                                setup_eventloop_valid_edf,
-            //                                teardown_eventloop),
+            cmocka_unit_test_setup_teardown(test_eventloop_dump_valid,
+            				setup_eventloop_deterministic_edf,
+            				teardown_eventloop),
+            cmocka_unit_test_setup_teardown(test_eventloop_read_json_continues,
+                                           setup_eventloop_deterministic_edf,
+                                           teardown_eventloop),
             cmocka_unit_test_setup_teardown(test_eventloop_breakable,
                                             setup_eventloop_valid_edf,
                                             teardown_eventloop),

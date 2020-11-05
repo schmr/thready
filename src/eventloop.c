@@ -251,6 +251,7 @@ void eventloop_read_json(eventloop* evl, FILE* stream) {
 
         int i = 0;
 
+        // Order is important, therefore use get instead of pop.
         intmax_t* now = selist_get(l, i++);
         evl->now = *now;
 
@@ -285,7 +286,17 @@ void eventloop_read_json(eventloop* evl, FILE* stream) {
                 } else {
                         jobq_insert_by(scheduler, j, job_get_deadline);
                 }
+                free(taskid);
+                free(starttime);
+                free(overruntime);
+                free(deadline);
+                free(computation);
         }
+        for (; i >= 0; i--) {
+                selist_delete(&l, i);
+        }
+        assert(selist_empty(l));
+        selist_free(l);
         jobq_free(evl->pq);
         evl->pq = scheduler;
         jobgen_set_simtime(evl->jg, simtimes, ts_length(tsy));
@@ -310,4 +321,5 @@ void eventloop_read_json(eventloop* evl, FILE* stream) {
                 jobq_insert_by(evl->pq, evl->currentjob, job_get_deadline);
         }
         free(simtimes);
+        free(now);
 }
