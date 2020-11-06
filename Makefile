@@ -15,7 +15,7 @@ src := $(addsuffix .c, $(addprefix src/, ${modules}))
 obj := $(addsuffix .o, ${modules})
 
 
-all: thready test
+all: thready coverage benchmark
 
 # Disable coverage for thirdparty code
 pqueue.o: src/pqueue.c
@@ -81,16 +81,17 @@ integrationtest: thready
 # Coverage
 
 coverage: test_all
-	./test_all && gcovr --fail-under-line 100.0 -r . -e inc/rnd.h -e src/pqueue.c -e src/json.c -e src/selist.c -e test/test_all.c -s
+	./test_all && gcovr --fail-under-line 100.0 -r . -e inc/rnd.h -e src/pqueue.c -e src/main.c -e src/json.c -e src/selist.c -e test/test_all.c -s
 
 # Performance test
 
 profile: threadyprofile
 	valgrind --tool=callgrind ./$< -n makefile-callgrind -j test/p41-ts-nointerarrival-nohi.json -t 360000000
 
+PYTHON := python3.8
 benchmark: thready-performance-benchmark.csv
-thready-performance-benchmark.csv: thready test/p41-ts-nointerarrival-nohi.json
-	seq 30 | parallel --results $@ --eta -j1 './$< -n makefile-benchmark -j test/p41-ts-nointerarrival-nohi.json -t 360000000  -z {} | sed -e "s/.* \([0-9]\+\) events .*/\1/"'
+thready-performance-benchmark.csv: thready test/p41-ts-nointerarrival-nohi.json test/check_performance.py
+	seq 30 | parallel --results $@ --eta -j1 './$< -n makefile-benchmark -j test/p41-ts-nointerarrival-nohi.json -t 360000000  -z {} | sed -e "s/.* \([0-9]\+\) events .*/\1/"' && ${python} test/check_performance.py
 
 # Documentation
 
