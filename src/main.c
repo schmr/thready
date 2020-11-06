@@ -209,8 +209,8 @@ int main(int argc, char* argv[]) {
                 exit(EXIT_FAILURE);
         }
 
-        eventloop_result r = eventloop_run(s->evl, s->breaktime, s->speed,
-                                  s->overrunbreak);
+        eventloop_result r =
+            eventloop_run(s->evl, s->breaktime, s->speed, s->overrunbreak);
 
         // Dump results
         char fname[FILENAMEMAXLEN] = {0};

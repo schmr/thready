@@ -191,7 +191,7 @@ void eventloop_print_result(eventloop const* const evl,
                         fprintf(stdout, "%" PRId64 ": Pass simulation\n",
                                 (int64_t)(evl->now));
                         break;
-                default: // GCOVR_EXCL_START
+                default:  // GCOVR_EXCL_START
                         break;
                         // GCOVR_EXCL_STOP
         }

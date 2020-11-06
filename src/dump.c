@@ -29,12 +29,12 @@ static int compare_ptr_descending(const void* a, const void* b) {
         uintptr_t* x = (uintptr_t*)a;
         uintptr_t* y = (uintptr_t*)b;
         if (*x < *y) {
-                return 1;  // Return -1 if you want ascending, 1 if you want
-                           // descending order
-        } else if (*x > *y) { // GCOVR_EXCL_START
-                return -1;  // Return 1 if you want ascending, -1 if you want
-                            // descending order
-        } // GCOVR_EXCL_STOP
+                return 1;      // Return -1 if you want ascending, 1 if you want
+                               // descending order
+        } else if (*x > *y) {  // GCOVR_EXCL_START
+                return -1;     // Return 1 if you want ascending, -1 if you want
+                               // descending order
+        }                      // GCOVR_EXCL_STOP
         return 0;
 }
 
@@ -42,9 +42,9 @@ int uniq(void* const* const src, void** dst, int n) {
         void** dup = calloc(n, sizeof(void*));
         if (dup) {
                 memcpy(dup, src, n * sizeof(void*));
-        } else { // GCOVR_EXCL_START
+        } else {  // GCOVR_EXCL_START
                 return 0;
-        } // GCOVR_EXCL_STOP
+        }  // GCOVR_EXCL_STOP
         qsort(dup, n, sizeof(void*), compare_ptr_descending);
 
         void* last = (void*)0;
@@ -67,9 +67,9 @@ static int dump_json_tostream_cb(void* userdata,
         FILE* stream = userdata;
         if (fwrite(s, sizeof(char), length, stream)) {
                 return 0;
-        } else { // GCOVR_EXCL_START
+        } else {  // GCOVR_EXCL_START
                 return 1;
-        } // GCOVR_EXCL_STOP
+        }  // GCOVR_EXCL_STOP
 }
 
 json_printer* dump_json_tostream_init(FILE* stream) {
@@ -111,8 +111,7 @@ static int callback_append(void* userdata,
                                 *valf = strtof(data, NULL);
                                 if ((errno == ERANGE &&  // GCOVR_EXCL_START
                                      (*valf == FLT_MAX || *valf == FLT_MIN)) ||
-                                    (errno != 0 &&
-                                     valf == 0)) {
+                                    (errno != 0 && valf == 0)) {
                                         fprintf(
                                             stderr,
                                             "error converting string to int\n");

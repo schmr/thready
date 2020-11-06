@@ -101,12 +101,13 @@ static void test_dump_uniq_valid(void** state) {
         free(u);
 }
 
-
 static void test_dump_json_tostream(void** state) {
         struct dumpstate* s = *state;
 
         FILE* stream = fopen("test_dump_json_tostream.json", "w");
-        if (!stream) { fail_msg("Could not open file for testing!\n"); }
+        if (!stream) {
+                fail_msg("Could not open file for testing!\n");
+        }
         json_printer* jp = dump_json_tostream_init(stream);
         for (int i = 0; i < s->n; i++) {
                 int* p = (int*)*(s->src + i);
@@ -115,18 +116,23 @@ static void test_dump_json_tostream(void** state) {
         dump_json_tostream_free(jp);
 
         stream = freopen(NULL, "r", stream);
-        if (!stream) { fail_msg("Could not reopen file for testing!\n"); }
-        char* buf = calloc(2*s->n, sizeof(char));
-        if (!buf) { fail_msg("Could not allocate buffer memory!\n"); }
-        *(buf + 2*s->n -1) = 0;
+        if (!stream) {
+                fail_msg("Could not reopen file for testing!\n");
+        }
+        char* buf = calloc(2 * s->n, sizeof(char));
+        if (!buf) {
+                fail_msg("Could not allocate buffer memory!\n");
+        }
+        *(buf + 2 * s->n - 1) = 0;
         char gld[] = "0,1,2,3,4,5,6,7,8,9";
-        size_t rb = fread(buf, sizeof(char), 2*(s->n) - 1, stream);
-        if (!rb) { fail_msg("Could not read file for testing!\n"); }
+        size_t rb = fread(buf, sizeof(char), 2 * (s->n) - 1, stream);
+        if (!rb) {
+                fail_msg("Could not read file for testing!\n");
+        }
         assert_string_equal(buf, gld);
         free(buf);
         fclose(stream);
 }
-
 
 int setup_eventloop_valid_edf(void** state) {
         struct eventloopstate* s = calloc(1, sizeof(struct eventloopstate));
@@ -275,10 +281,10 @@ static void test_eventloop_stepable(void** state) {
         struct eventloopstate* s = *state;
 
         eventloop_result r;
-        const LargestIntegralType expected[] = { EVL_OK, EVL_PASS };
+        const LargestIntegralType expected[] = {EVL_OK, EVL_PASS};
         for (int i = 0; i < 153; i++) {
                 r = eventloop_run(s->evl, i, 1, false);
-                //assert_int_equal(r, EVL_OK);
+                // assert_int_equal(r, EVL_OK);
                 assert_in_set(r, expected, 2);
         }
         eventloop_print_result(s->evl, r);
@@ -295,7 +301,8 @@ static void test_eventloop_dump_valid(void** state) {
         stream = fopen("test-eventloop-dump-valid.json", "r");
         if (stream) {
                 char block[1024];
-                char golden[] = "{\"now\":0,\"jobs\":[[19,14,22,21,3],[19,0,8,7,3]]}";
+                char golden[] =
+                    "{\"now\":0,\"jobs\":[[19,14,22,21,3],[19,0,8,7,3]]}";
                 int len;
                 len = fread(&block, sizeof(char), 1024, stream);
                 fclose(stream);
@@ -321,7 +328,8 @@ static void test_eventloop_read_json_continues(void** state) {
 
         // Assert that dumping twice results in same file content
         char block[1024];
-        char golden[] = "{\"now\":100,\"jobs\":[[19,112,120,119,3],[19,98,106,105,1]]}";
+        char golden[] =
+            "{\"now\":100,\"jobs\":[[19,112,120,119,3],[19,98,106,105,1]]}";
         int len;
 
         stream = fopen("test-eventloop-read.json", "r");
@@ -333,7 +341,6 @@ static void test_eventloop_read_json_continues(void** state) {
         len = fread(&block, sizeof(char), 1024, stream);
         fclose(stream);
         assert_memory_equal(&block, &golden, len);
-
 
         eventloop_free(s->evl);
         s->evl = eventloop_init(s->jg, false);
@@ -352,7 +359,7 @@ static void test_eventloop_breakable(void** state) {
 
         eventloop_result r = eventloop_run(s->evl, 300, 1, false);
         assert_int_equal(r, EVL_OK);
-        const LargestIntegralType expected[] = { EVL_OK, EVL_PASS };
+        const LargestIntegralType expected[] = {EVL_OK, EVL_PASS};
         for (int i = 0; i < 353; i++) {
                 r = eventloop_run(s->evl, i, 1, false);
                 assert_in_set(r, expected, 2);
@@ -501,7 +508,7 @@ static void test_jobgen_set_simtime(void** state) {
         free(dst);
 }
 
-static void test_jobgen_get_tasksystem(void ** state) {
+static void test_jobgen_get_tasksystem(void** state) {
         struct jobgenstate* s = *state;
 
         task* t = ts_get_by_pos(s->tsy, 0);
@@ -788,9 +795,8 @@ int main(void) {
             cmocka_unit_test_setup_teardown(test_jobgen_get_tasksystem,
                                             setup_jobgen_deterministic,
                                             teardown_jobgen),
-            cmocka_unit_test_setup_teardown(test_jobgen_dump,
-                                            setup_jobgen_deterministic,
-                                            teardown_jobgen),
+            cmocka_unit_test_setup_teardown(
+                test_jobgen_dump, setup_jobgen_deterministic, teardown_jobgen),
             cmocka_unit_test_setup_teardown(test_jobgen_replace_jobq,
                                             setup_jobgen_deterministic,
                                             teardown_jobgen),
@@ -837,21 +843,21 @@ int main(void) {
             cmocka_unit_test_setup_teardown(
                 test_eventloop_edf_deterministic_cant_overrun,
                 setup_eventloop_deterministic_edf, teardown_eventloop),
-            cmocka_unit_test_setup_teardown(
-                test_eventloop_run_speed,
-                setup_eventloop_deterministic_edf, teardown_eventloop),
-            cmocka_unit_test_setup_teardown(
-                test_eventloop_run_pass,
-                setup_eventloop_deterministic_edf, teardown_eventloop),
+            cmocka_unit_test_setup_teardown(test_eventloop_run_speed,
+                                            setup_eventloop_deterministic_edf,
+                                            teardown_eventloop),
+            cmocka_unit_test_setup_teardown(test_eventloop_run_pass,
+                                            setup_eventloop_deterministic_edf,
+                                            teardown_eventloop),
             cmocka_unit_test_setup_teardown(test_eventloop_stepable,
                                             setup_eventloop_valid_edf,
                                             teardown_eventloop),
             cmocka_unit_test_setup_teardown(test_eventloop_dump_valid,
-            				setup_eventloop_deterministic_edf,
-            				teardown_eventloop),
+                                            setup_eventloop_deterministic_edf,
+                                            teardown_eventloop),
             cmocka_unit_test_setup_teardown(test_eventloop_read_json_continues,
-                                           setup_eventloop_deterministic_edf,
-                                           teardown_eventloop),
+                                            setup_eventloop_deterministic_edf,
+                                            teardown_eventloop),
             cmocka_unit_test_setup_teardown(test_eventloop_breakable,
                                             setup_eventloop_valid_edf,
                                             teardown_eventloop),

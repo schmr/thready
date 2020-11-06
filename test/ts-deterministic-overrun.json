@@ -1,0 +1,4 @@
+[
+	# id, period, reldead, comp0, comp1, ..., comp5, prob1, prob2, beta
+	[20, 7, 7, 3,3, 4,5, 0,0, 0.0, 1.0, 0.01]
+]
