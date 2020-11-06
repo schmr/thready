@@ -29,12 +29,12 @@ static int compare_ptr_descending(const void* a, const void* b) {
         uintptr_t* x = (uintptr_t*)a;
         uintptr_t* y = (uintptr_t*)b;
         if (*x < *y) {
-                return 1;  // Return -1 if you want ascending, 1 if you want
-                           // descending order
-        } else if (*x > *y) {
-                return -1;  // Return 1 if you want ascending, -1 if you want
-                            // descending order
-        }
+                return 1;      // Return -1 if you want ascending, 1 if you want
+                               // descending order
+        } else if (*x > *y) {  // GCOVR_EXCL_START
+                return -1;     // Return 1 if you want ascending, -1 if you want
+                               // descending order
+        }                      // GCOVR_EXCL_STOP
         return 0;
 }
 
@@ -42,9 +42,9 @@ int uniq(void* const* const src, void** dst, int n) {
         void** dup = calloc(n, sizeof(void*));
         if (dup) {
                 memcpy(dup, src, n * sizeof(void*));
-        } else {
+        } else {  // GCOVR_EXCL_START
                 return 0;
-        }
+        }  // GCOVR_EXCL_STOP
         qsort(dup, n, sizeof(void*), compare_ptr_descending);
 
         void* last = (void*)0;
@@ -67,18 +67,19 @@ static int dump_json_tostream_cb(void* userdata,
         FILE* stream = userdata;
         if (fwrite(s, sizeof(char), length, stream)) {
                 return 0;
-        } else {
+        } else {  // GCOVR_EXCL_START
                 return 1;
-        }
+        }  // GCOVR_EXCL_STOP
 }
 
 json_printer* dump_json_tostream_init(FILE* stream) {
         json_printer* print = calloc(1, sizeof(json_printer));
         if (print) {
-                if (json_print_init(print, dump_json_tostream_cb, stream)) {
+                if (json_print_init(print, dump_json_tostream_cb,
+                                    stream)) {  // GCOVR_EXCL_START
                         fprintf(stderr, "error init dump json\n");
                         exit(EXIT_FAILURE);
-                }
+                }  // GCOVR_EXCL_STOP
         }
         return print;
 }
@@ -108,35 +109,35 @@ static int callback_append(void* userdata,
                                 // See `man strtol` example for error handling
                                 errno = 0;
                                 *valf = strtof(data, NULL);
-                                if ((errno == ERANGE &&
+                                if ((errno == ERANGE &&  // GCOVR_EXCL_START
                                      (*valf == FLT_MAX || *valf == FLT_MIN)) ||
                                     (errno != 0 && valf == 0)) {
                                         fprintf(
                                             stderr,
                                             "error converting string to int\n");
                                         exit(EXIT_FAILURE);
-                                }
+                                }  // GCOVR_EXCL_STOP
                                 selist_push(l, valf);
-                        } else {
+                        } else {  // GCOVR_EXCL_START
                                 fprintf(stderr, "error adding float value\n");
                                 exit(EXIT_FAILURE);
-                        }
+                        }  // GCOVR_EXCL_STOP
                         break;
                 case JSON_INT:
                         vali = calloc(1, sizeof(intmax_t));
                         if (vali) {
                                 *vali = strtoimax(data, NULL, 10);
-                                if (errno == ERANGE) {
+                                if (errno == ERANGE) {  // GCOVR_EXCL_START
                                         fprintf(
                                             stderr,
                                             "error converting string to int\n");
                                         exit(EXIT_FAILURE);
-                                }
+                                }  // GCOVR_EXCL_STOP
                                 selist_push(l, vali);
-                        } else {
+                        } else {  // GCOVR_EXCL_START
                                 fprintf(stderr, "error adding integer value\n");
                                 exit(EXIT_FAILURE);
-                        }
+                        }  // GCOVR_EXCL_STOP
                         break;
         }
         return 0;
@@ -147,10 +148,11 @@ json_parser* dump_read_json_init(void* cb_data) {
         json_parser* parser = calloc(1, sizeof(json_parser));
         json_config cfg = {0};
         cfg.allow_yaml_comments = 1;
-        if (json_parser_init(parser, &cfg, callback_append, cb_data)) {
+        if (json_parser_init(parser, &cfg, callback_append,
+                             cb_data)) {  // GCOVR_EXCL_START
                 fprintf(stderr, "json parser init fail\n");
                 exit(EXIT_FAILURE);
-        }
+        }  // GCOVR_EXCL_STOP
         return parser;
 }
 
@@ -160,11 +162,11 @@ void dump_read_json_parse(json_parser* p, FILE* stream) {
         while ((len = fread(&block, sizeof(char), 1024, stream)) > 0) {
                 uint32_t processed = 0;
                 int ret = json_parser_string(p, block, len, &processed);
-                if (ret) {
+                if (ret) {  // GCOVR_EXCL_START
                         fprintf(stderr, "error parsing json at char %d\n",
                                 processed);
                         exit(EXIT_FAILURE);
-                }
+                }  // GCOVR_EXCL_STOP
         }
 }
 

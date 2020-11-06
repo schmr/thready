@@ -29,7 +29,12 @@ typedef struct eventloop eventloop;
 /**
  * @brief Possible results of running the event loop.
  */
-typedef enum { EVL_OK = 0, EVL_DEADLINEMISS, EVL_PASS, EVL_OVERRUN } eventloop_result;
+typedef enum {
+        EVL_OK = 0,
+        EVL_DEADLINEMISS,
+        EVL_PASS,
+        EVL_OVERRUN
+} eventloop_result;
 
 /**
  * @brief Initialize the eventloop fetching the first job from the generator.
@@ -189,7 +194,10 @@ EVL_INT eventloop_get_now(eventloop* evl);
  * @param speed Processor speed in unit of work per timestep.
  * @return Signal successful scheduling or deadline miss.
  */
-eventloop_result eventloop_run(eventloop* evl, JOB_INT breaktime, JOB_INT speed, bool overrunbreak);
+eventloop_result eventloop_run(eventloop* evl,
+                               JOB_INT breaktime,
+                               JOB_INT speed,
+                               bool overrunbreak);
 
 /**
  * @brief Human readable state print of eventloop.

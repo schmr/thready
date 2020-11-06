@@ -9,10 +9,6 @@ this software. If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 */
 #include "stats.h"
 
-int uniform(rnd_pcg_t** pcg, int min, int max) {
-        return rnd_pcg_range(*pcg, min, max);
-}
-
 float uniformf(rnd_pcg_t** pcg, float min, float max) {
         float r = rnd_pcg_nextf(*pcg);
         return r * (max - min) + min;

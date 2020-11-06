@@ -20,11 +20,6 @@ this software. If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 #include "rnd.h"
 
 /**
- * @brief Draw uniformly distributed random integer
- */
-int uniform(rnd_pcg_t** pcg, int min, int max);
-
-/**
  * @brief Draw uniformly distributed random float
  */
 float uniformf(rnd_pcg_t** pcg, float min, float max);

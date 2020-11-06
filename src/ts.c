@@ -28,11 +28,11 @@ ts* ts_init() {
         ts* tsy = calloc(1, sizeof(ts));
         if (tsy) {
                 return tsy;
-        } else {
+        } else {  // GCOVR_EXCL_START
                 fprintf(stderr, "error allocating memory for tasksystem: %s\n",
                         strerror(errno));
                 exit(EXIT_FAILURE);
-        }
+        }  // GCOVR_EXCL_STOP
 }
 
 void ts_free(ts* tsy) {
@@ -53,11 +53,11 @@ task* ts_get_by_pos(ts const* const tsy, int const pos) {
         task* t = selist_get(l, pos);
         if (t) {
                 return t;
-        } else {
+        } else {  // GCOVR_EXCL_START
                 fprintf(stderr, "tasksystem pos. error: task %d not found\n",
                         pos);
                 exit(EXIT_FAILURE);
-        }
+        }  // GCOVR_EXCL_STOP
 }
 
 task* ts_get_by_id(ts const* const tsy, TASK_INT const id) {
@@ -73,8 +73,10 @@ task* ts_get_by_id(ts const* const tsy, TASK_INT const id) {
                         }
                 }
         }
+        // GCOVR_EXCL_START
         fprintf(stderr, "tasksystem key error\n");
         exit(EXIT_FAILURE);
+        // GCOVR_EXCL_STOP
 }
 
 int ts_get_pos_by_id(ts const* const tsy, TASK_INT const taskid) {
@@ -89,10 +91,10 @@ int ts_get_pos_by_id(ts const* const tsy, TASK_INT const taskid) {
                         break;
                 }
         }
-        if (taskid != task_get_id(t)) {
+        if (taskid != task_get_id(t)) {  // GCOVR_EXCL_START
                 fprintf(stderr, "task id not found\n");
                 exit(EXIT_FAILURE);
-        }
+        }  // GCOVR_EXCL_STOP
         return k;
 }
 
@@ -102,6 +104,14 @@ int ts_length(ts const* const tsy) {
 }
 
 static void selist_to_ts(ts* tsy, struct selist** l) {
+        /* At least some sanity checking... */
+        int len = selist_length(*l);
+        if (len % TASK_NUM_PARAM) {  // GCOVR_EXCL_START
+                fprintf(stderr,
+                        "task system ill defined: json contains %d values\n",
+                        len);
+                exit(EXIT_FAILURE);
+        }  // GCOVR_EXCL_STOP
         int i = 0;
         while (i < selist_length(*l)) {
                 intmax_t* id = selist_get(*l, i++);

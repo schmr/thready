@@ -44,16 +44,17 @@ eventloop* eventloop_init(jobgen* const jg, bool init) {
                         evl->jobs_done = 0;
                         evl->events_done = 0;
                 }
-        } else {
+        } else {  // GCOVR_EXCL_START
                 fprintf(stderr, "error allocating memory for eventloop\n");
                 exit(EXIT_FAILURE);
-        }
+        }  // GCOVR_EXCL_STOP
         return evl;
 }
 
 void eventloop_free(eventloop* evl) {
-        job_free(evl->nextjob);
         jobq_free(evl->pq);
+        // evl->currentjob is free'd by eventloop_run
+        job_free(evl->nextjob);
         free(evl);
 }
 
@@ -61,7 +62,13 @@ EVL_INT eventloop_get_now(eventloop* evl) {
         return evl->now;
 }
 
-eventloop_result eventloop_run(eventloop* evl, JOB_INT breaktime, JOB_INT speed, bool overrunbreak) {
+eventloop_result eventloop_run(eventloop* evl,
+                               JOB_INT breaktime,
+                               JOB_INT speed,
+                               bool overrunbreak) {
+        if (breaktime <= evl->now) {
+                return EVL_PASS;  // Nothing to simulate
+        }
         // Initialize local pointers, now is set to starttime of current job
         // by initialization of eventloop, and currentjob is added to scheduler
         // queue.
@@ -84,8 +91,8 @@ eventloop_result eventloop_run(eventloop* evl, JOB_INT breaktime, JOB_INT speed,
                         overruntime = job_get_overruntime(currentjob);
                 } else {
                         // If there is no job in scheduler queue,
-                        // disable overrun checking with dummy overrun time which
-                        // is too late to be considered.
+                        // disable overrun checking with dummy overrun time
+                        // which is too late to be considered.
                         overruntime = arrival + 123;
                 }
                 if (overrunbreak && (overruntime < arrival)) {
@@ -104,8 +111,10 @@ eventloop_result eventloop_run(eventloop* evl, JOB_INT breaktime, JOB_INT speed,
                                 job_set_computation(currentjob, c - workdelta);
                                 runtime = 0;
                         } else {  // Finish job and update runtime budget
-                                JOB_INT time_spent = c / speed; // truncation is optimistic
-                                if (c % speed > 0) { // conservative; wasting some capacity
+                                JOB_INT time_spent =
+                                    c / speed;  // truncation is optimistic
+                                if (c % speed >
+                                    0) {  // conservative; wasting some capacity
                                         runtime -= 1;
                                         evl->now += 1;
                                 }
@@ -182,8 +191,9 @@ void eventloop_print_result(eventloop const* const evl,
                         fprintf(stdout, "%" PRId64 ": Pass simulation\n",
                                 (int64_t)(evl->now));
                         break;
-                default:
+                default:  // GCOVR_EXCL_START
                         break;
+                        // GCOVR_EXCL_STOP
         }
 }
 
@@ -241,6 +251,7 @@ void eventloop_read_json(eventloop* evl, FILE* stream) {
 
         int i = 0;
 
+        // Order is important, therefore use get instead of pop.
         intmax_t* now = selist_get(l, i++);
         evl->now = *now;
 
@@ -248,11 +259,11 @@ void eventloop_read_json(eventloop* evl, FILE* stream) {
         jobq* scheduler = jobq_init();
         jobq* generator = jobq_init();
         JOB_INT* simtimes = calloc(ts_length(tsy), sizeof(JOB_INT));
-        if (!simtimes) {
+        if (!simtimes) {  // GCOVR_EXCL_START
                 fprintf(stderr,
                         "error allocating memory while restoring state\n");
                 exit(EXIT_FAILURE);
-        }
+        }                               // GCOVR_EXCL_STOP
         while (i < selist_length(l)) {  // skipped if no job in list due to drop
                 // Recreate job from list with knowledge about order,
                 // sorry future me/others!
@@ -261,7 +272,8 @@ void eventloop_read_json(eventloop* evl, FILE* stream) {
                 intmax_t* overruntime = selist_get(l, i++);
                 intmax_t* deadline = selist_get(l, i++);
                 intmax_t* computation = selist_get(l, i++);
-                job* j = job_init(*taskid, *starttime, *overruntime, *deadline, *computation);
+                job* j = job_init(*taskid, *starttime, *overruntime, *deadline,
+                                  *computation);
                 if (*starttime > *now) {
                         jobq_insert_by(generator, j, job_get_starttime);
                         int k = ts_get_pos_by_id(tsy, *taskid);
@@ -274,11 +286,22 @@ void eventloop_read_json(eventloop* evl, FILE* stream) {
                 } else {
                         jobq_insert_by(scheduler, j, job_get_deadline);
                 }
+                free(taskid);
+                free(starttime);
+                free(overruntime);
+                free(deadline);
+                free(computation);
         }
+        for (; i >= 0; i--) {
+                selist_delete(&l, i);
+        }
+        assert(selist_empty(l));
+        selist_free(l);
         jobq_free(evl->pq);
         evl->pq = scheduler;
         jobgen_set_simtime(evl->jg, simtimes, ts_length(tsy));
         jobgen_replace_jobq(evl->jg, generator);
+        /* This is unused legacy code?
         if (i == 1) {  // we dropped everything
                 // simtimes are all zero, need to set them to current
                 // missiontime
@@ -288,6 +311,7 @@ void eventloop_read_json(eventloop* evl, FILE* stream) {
                 jobgen_set_simtime(evl->jg, simtimes, ts_length(tsy));
                 jobgen_refill_all(evl->jg);
         }
+        */
         // It is perfectly fine to raise NULL if no job is due because we might
         // already have passed beyond the mission duration, which would prevent
         // the generator from creating new jobs.
@@ -299,4 +323,5 @@ void eventloop_read_json(eventloop* evl, FILE* stream) {
                 jobq_insert_by(evl->pq, evl->currentjob, job_get_deadline);
         }
         free(simtimes);
+        free(now);
 }

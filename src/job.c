@@ -26,7 +26,7 @@ job* job_init(JOB_INT const taskid,
               JOB_INT const overruntime,
               JOB_INT const deadline,
               JOB_INT const computation) {
-        job* j = malloc(sizeof(job));
+        job* j = calloc(1, sizeof(job));
         if (j) {
                 j->taskid = taskid;
                 j->starttime = starttime;
@@ -34,11 +34,11 @@ job* job_init(JOB_INT const taskid,
                 j->deadline = deadline;
                 j->computation = computation;
                 return j;
-        } else {
+        } else {  // GCOVR_EXCL_START
                 fprintf(stderr, "error allocating memory for job: %s\n",
                         strerror(errno));
                 exit(EXIT_FAILURE);
-        }
+        }  // GCOVR_EXCL_STOP
 }
 
 void job_free(job* const j) {
