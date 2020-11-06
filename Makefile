@@ -37,6 +37,9 @@ json.o: src/json.c
 threadydebug: ${obj}
 	${cc} -o $@ $^ ${linkargsdebug} -lm
 
+threadyprofile: ${src}
+	${cc} ${ccargscommon} -march=native -O0 -g -fprofile-arcs -o $@ $^ -lm
+
 
 thready: ${src}
 	${cc} ${ccargscentos} -o $@ $^ -lm
@@ -68,7 +71,6 @@ test_all: test_all.o ts.o task.o selist.o rnd.o stats.o json.o job.o jobgen.o jo
 
 unittest: test_all
 	./test_all
-	valgrind --quiet --leak-check=full --leak-resolution=high --error-exitcode=1 --exit-on-first-error=yes --log-file=/dev/null ./test_all
 
 
 integrationtest: thready
@@ -79,18 +81,16 @@ integrationtest: thready
 # Coverage
 
 coverage: test_all
-	./test_all && gcovr -r . -e inc/rnd.h -e src/pqueue.c -e src/json.c -e src/selist.c -e test/test_all.c -s
+	./test_all && gcovr --fail-under-line 100.0 -r . -e inc/rnd.h -e src/pqueue.c -e src/json.c -e src/selist.c -e test/test_all.c -s
 
 # Performance test
 
-profile: threadydebug
-	valgrind --tool=callgrind ./threadydebug -n makefile-callgrind -j test/p41-ts-nointerarrival-nohi.json -t 360000000
+profile: threadyprofile
+	valgrind --tool=callgrind ./$< -n makefile-callgrind -j test/p41-ts-nointerarrival-nohi.json -t 360000000
 
 benchmark: thready-performance-benchmark.csv
-thready-performance-benchmark.csv: thready
-	seq 30 | parallel --results $@ --eta -j1 './$< -m 36000000 -s {} | sed -e "s/.* \([0-9]\+\) events/\1/"'
-#fast2.csv: fast2
-#	seq 3600000 1000000 36000000 | parallel --results $@ --eta -j3 './$< {} 0'
+thready-performance-benchmark.csv: thready test/p41-ts-nointerarrival-nohi.json
+	seq 30 | parallel --results $@ --eta -j1 './$< -n makefile-benchmark -j test/p41-ts-nointerarrival-nohi.json -t 360000000  -z {} | sed -e "s/.* \([0-9]\+\) events .*/\1/"'
 
 # Documentation
 
