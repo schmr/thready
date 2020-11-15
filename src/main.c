@@ -40,6 +40,7 @@ struct state {
         JOB_INT breaktime;
         JOB_INT speed;
         bool overrunbreak;
+        bool allow_first_overrun;
 };
 
 static struct state* state_reference;
@@ -79,6 +80,8 @@ int main(int argc, char* argv[]) {
         // Setting default values
         s->breaktime = 60000;
         s->speed = 1;
+        s->overrunbreak = false;
+        s->allow_first_overrun = false;
 
         int prefixlen = 0;
 
@@ -89,7 +92,7 @@ int main(int argc, char* argv[]) {
         parg_init(&ps);
         // abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ
         //  x     x x   x   x x xx  x
-        while ((c = parg_getopt(&ps, argc, argv, "bhz:t:vj:r:n:w:")) != -1) {
+        while ((c = parg_getopt(&ps, argc, argv, "abhz:t:vj:r:n:w:")) != -1) {
                 switch (c) {
                         case 1:
                                 printf("nonoption '%s'\n", ps.optarg);
@@ -99,7 +102,7 @@ int main(int argc, char* argv[]) {
                                     "Usage: thready [-h] [-v] "
                                     "[-r <statedump.json>] "
                                     "[-z jobtracerandomseed] "
-                                    "[-b] "
+                                    "[-b] [-a] "
                                     "-n dumpprefix "
                                     "-t breaktime "
                                     "-w work/timestep "
@@ -132,6 +135,9 @@ int main(int argc, char* argv[]) {
                         // Simulation control
                         case 'b':
                                 s->overrunbreak = true;
+                                break;
+                        case 'a':
+                                s->allow_first_overrun = true;
                                 break;
                         case 'z':
                                 s->randomseed_jobtrace = atoi(ps.optarg);
@@ -185,10 +191,10 @@ int main(int argc, char* argv[]) {
                 s->jg = jobgen_init(s->tsy, s->randomseed_jobtrace, true);
         }
         if (s->resume) {
-                s->evl = eventloop_init(s->jg, false);
+                s->evl = eventloop_init(s->jg, false, s->allow_first_overrun);
                 eventloop_read_json(s->evl, s->resume);
         } else {
-                s->evl = eventloop_init(s->jg, true);
+                s->evl = eventloop_init(s->jg, true, s->allow_first_overrun);
         }
 
         // Install handlers to free memory on exit and to state dump on signals

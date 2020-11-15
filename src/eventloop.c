@@ -26,11 +26,15 @@ struct eventloop {
         JOB_INT jobs_done;
         job* currentjob;
         job* nextjob;
+        bool had_overrun;
+        bool allow_first_overrun;
 };
 
-eventloop* eventloop_init(jobgen* const jg, bool init) {
+eventloop* eventloop_init(jobgen* const jg, bool init, bool allow_first_overrun) {
         eventloop* evl = calloc(1, sizeof(eventloop));
         if (evl) {
+                evl-> had_overrun = false;
+                evl-> allow_first_overrun = allow_first_overrun;
                 evl->jg = jg;
                 evl->pq = jobq_init();
                 if (init) {  // differentiate to support resume from state dump
@@ -95,9 +99,20 @@ eventloop_result eventloop_run(eventloop* evl,
                         // which is too late to be considered.
                         overruntime = arrival + 123;
                 }
+                /* Overruntime of current job is always < arrival of next job if overruntime is to be considered */
                 if (overrunbreak && (overruntime < arrival)) {
-                        runtime = overruntime - evl->now;
+                        if (evl->allow_first_overrun) {
+                                if (evl->had_overrun) {
+                                        runtime = overruntime - evl->now;
+                                } else {
+                                        /* Execution of next job is beyond its overrun; take note. */
+                                        evl->had_overrun = true;
+                                }
+                        } else {
+                                runtime = overruntime - evl->now;
+                        }
                 }
+                assert(!(runtime < 0));
                 while (runtime > 0) {
                         currentjob = jobq_peek(evl->pq);
                         if (!currentjob) {  // No job in scheduler queue
@@ -144,6 +159,9 @@ eventloop_result eventloop_run(eventloop* evl,
                         break;
                 }
                 if (overrunbreak && (evl->now == overruntime)) {
+                        /* If first overrun is tolerated, we do not hit this block because we worked past overruntime
+                         * until the job was finished.
+                         */
                         evl->currentjob = currentjob;
                         evl->nextjob = nextjob;
                         return EVL_OVERRUN;

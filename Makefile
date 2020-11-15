@@ -7,7 +7,8 @@ incdirs := -Iinc
 ccargscommon := -DVERSION=\"$(GIT_VERSION)\" -std=c99 -Wall -Wextra -pedantic ${incdirs}
 ccargsdebugthirdparty := ${ccargscommon} -Werror -march=native -O0 -g -c
 ccargsdebug := ${ccargsdebugthirdparty} -fprofile-arcs -ftest-coverage -fPIC -fsanitize=address
-ccargscentos := ${ccargscommon} -march=native -O3 -s
+ccargscentos := ${ccargscommon} -march=native -Os -g
+ccargscentosopt := ${ccargscommon} -march=native -O3 -s
 linkargsdebug := -g -lgcov -lasan
 
 modules := main pqueue parg rnd selist stats task ts job json jobgen jobq pqueue eventloop dump
@@ -43,6 +44,9 @@ threadyprofile: ${src}
 
 thready: ${src}
 	${cc} ${ccargscentos} -o $@ $^ -lm
+
+threadyopt: ${src}
+	${cc} ${ccargscentosopt} -o $@ $^ -lm
 
 
 clean:

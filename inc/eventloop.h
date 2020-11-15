@@ -43,12 +43,16 @@ typedef enum {
  * This is required if the eventloop is restored from a state dump using @c
  * eventloop_read_json.
  *
+ * If @p allow_first_overrun is true, the eventloop does not break on the first
+ * overrun and continues execution until a break condition is true.
+ *
  * @see eventloop_read_json
  * @param init If true, set simulation time to zero and fetch first job from
  * generator.
+ * @param allow_first_overrun If true, ignore first overrun and do not break.
  * @return Handle to @c eventloop.
  */
-eventloop* eventloop_init(jobgen* const jg, bool init);
+eventloop* eventloop_init(jobgen* const jg, bool init, bool allow_first_overrun);
 
 /**
  * @brief Free memory of eventloop state.
