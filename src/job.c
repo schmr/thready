@@ -64,3 +64,7 @@ JOB_INT job_get_computation(job* const j) {
 void job_set_computation(job* const j, JOB_INT computation) {
         j->computation = computation;
 }
+
+void job_set_overruntime(job* const j, JOB_INT overruntime) {
+        j->overruntime = overruntime;
+}

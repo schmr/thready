@@ -94,7 +94,7 @@ profile: threadyprofile
 
 PYTHON := python3.8
 benchmark: thready-performance-benchmark.csv
-thready-performance-benchmark.csv: thready test/p41-ts-nointerarrival-nohi.json test/check_performance.py
+thready-performance-benchmark.csv: threadyopt test/p41-ts-nointerarrival-nohi.json test/check_performance.py
 	seq 30 | parallel --results $@ --eta -j1 './$< -n makefile-benchmark -j test/p41-ts-nointerarrival-nohi.json -t 360000000  -z {} | sed -e "s/.* \([0-9]\+\) events .*/\1/"' && ${python} test/check_performance.py
 
 # Documentation

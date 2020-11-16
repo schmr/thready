@@ -333,7 +333,7 @@ static void test_eventloop_dump_valid(void** state) {
         if (stream) {
                 char block[1024];
                 char golden[] =
-                    "{\"now\":0,\"jobs\":[[19,14,22,21,3],[19,0,8,7,3]]}";
+                    "{\"now\":0,\"jobs\":[[19,14,4,21,3],[19,0,4,7,3]]}";
                 int len;
                 len = fread(&block, sizeof(char), 1024, stream);
                 fclose(stream);
@@ -360,7 +360,7 @@ static void test_eventloop_read_json_continues(void** state) {
         // Assert that dumping twice results in same file content
         char block[1024];
         char golden[] =
-            "{\"now\":100,\"jobs\":[[19,112,120,119,3],[19,98,106,105,1]]}";
+            "{\"now\":100,\"jobs\":[[19,112,4,119,3],[19,98,2,105,1]]}";
         int len;
 
         stream = fopen("test-eventloop-read.json", "r");
@@ -577,7 +577,7 @@ static void test_jobgen_rise_deterministic(void** state) {
                 assert_int_equal(job_get_taskid(j), 19);
                 int starttime = i * 7;
                 int deadline = starttime + 7;
-                int dummy_overruntime = deadline + 1;
+                int dummy_overruntime = job_get_computation(j) + 1;
                 assert_int_equal(job_get_starttime(j), starttime);
                 assert_int_equal(job_get_deadline(j), deadline);
                 assert_int_equal(job_get_overruntime(j), dummy_overruntime);

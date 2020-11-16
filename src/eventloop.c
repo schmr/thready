@@ -90,26 +90,22 @@ eventloop_result eventloop_run(eventloop* evl,
                 }
                 // Check if current task overruns earlier than next task arrival
                 currentjob = jobq_peek(evl->pq);
-                JOB_INT overruntime;
+                JOB_INT overrun = 0;
+                bool current_job_overruns = false;
                 if (currentjob) {
-                        overruntime = job_get_overruntime(currentjob);
-                } else {
-                        // If there is no job in scheduler queue,
-                        // disable overrun checking with dummy overrun time
-                        // which is too late to be considered.
-                        overruntime = arrival + 123;
+                        overrun = evl->now + job_get_overruntime(currentjob);
+                        current_job_overruns = job_get_overruntime(currentjob) < job_get_computation(currentjob);
                 }
-                /* Overruntime of current job is always < arrival of next job if overruntime is to be considered */
-                if (overrunbreak && (overruntime < arrival)) {
+                if (overrunbreak && current_job_overruns) {
                         if (evl->allow_first_overrun) {
                                 if (evl->had_overrun) {
-                                        runtime = overruntime - evl->now;
+                                        runtime = overrun - evl->now;
                                 } else {
                                         /* Execution of next job is beyond its overrun; take note. */
                                         evl->had_overrun = true;
                                 }
                         } else {
-                                runtime = overruntime - evl->now;
+                                runtime = overrun - evl->now;
                         }
                 }
                 assert(!(runtime < 0));
@@ -120,10 +116,12 @@ eventloop_result eventloop_run(eventloop* evl,
                         }
                         JOB_INT deadline = job_get_deadline(currentjob);
                         JOB_INT c = job_get_computation(currentjob);
+                        JOB_INT o = job_get_overruntime(currentjob);
                         JOB_INT workdelta = runtime * speed;
                         if (workdelta <= c) {  // Spend complete runtime on job
                                 evl->now = evl->now + runtime;
                                 job_set_computation(currentjob, c - workdelta);
+                                job_set_overruntime(currentjob, o - workdelta);
                                 runtime = 0;
                         } else {  // Finish job and update runtime budget
                                 JOB_INT time_spent =
@@ -158,7 +156,7 @@ eventloop_result eventloop_run(eventloop* evl,
                         evl->now = breaktime;  // Equalize now for both cases
                         break;
                 }
-                if (overrunbreak && (evl->now == overruntime)) {
+                if (overrunbreak && (evl->now == overrun)) {
                         /* If first overrun is tolerated, we do not hit this block because we worked past overruntime
                          * until the job was finished.
                          */

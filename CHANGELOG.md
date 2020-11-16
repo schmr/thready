@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 ### Security
 
+## [1.4.1] - 2020-11-16
+### Fixed
+- Wrong handling of jobs with overrun
+
 ## [1.4.0] - 2020-11-16
 ### Added
 - Support to ignore first overrunning job
