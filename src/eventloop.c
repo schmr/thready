@@ -124,6 +124,7 @@ eventloop_result eventloop_run(eventloop* evl,
                                              1));
                                 }
                         } else {
+                                evl->had_overrun = true;
                                 runtime = overrun - evl->now;
                         }
                 }
@@ -175,7 +176,7 @@ eventloop_result eventloop_run(eventloop* evl,
                         evl->now = breaktime;  // Equalize now for both cases
                         break;
                 }
-                if (overrunbreak && (evl->now == overrun)) {
+                if (overrunbreak && (evl->now == overrun) && evl->had_overrun) {
                         /* If first overrun is tolerated, we do not hit this
                          * block because we worked past overruntime until the
                          * job was finished.
