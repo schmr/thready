@@ -36,7 +36,8 @@ typedef struct job job;
  * uniprocessor.
  * In mixed criticality simulations @p overruntime is the relative time when
  * the job requires more computation than expected (budget + one time step).
- * Both computation and overruntime are "used up" by executing the job on the CPU.
+ * Both computation and overruntime are "used up" by executing the job on the
+ * CPU.
  *
  * @param taskid Id of the task
  * @param starttime Job arrival time

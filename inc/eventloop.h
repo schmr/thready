@@ -52,7 +52,9 @@ typedef enum {
  * @param allow_first_overrun If true, ignore first overrun and do not break.
  * @return Handle to @c eventloop.
  */
-eventloop* eventloop_init(jobgen* const jg, bool init, bool allow_first_overrun);
+eventloop* eventloop_init(jobgen* const jg,
+                          bool init,
+                          bool allow_first_overrun);
 
 /**
  * @brief Free memory of eventloop state.

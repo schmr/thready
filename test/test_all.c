@@ -298,7 +298,8 @@ static void test_eventloop_edf_deterministic_overrun(void** state) {
         eventloop_print_result(s->evl, r);
 }
 
-static void test_eventloop_edf_deterministic_overrun_first_allowed(void** state) {
+static void test_eventloop_edf_deterministic_overrun_first_allowed(
+    void** state) {
         struct eventloopstate* s = *state;
         eventloop_result r = eventloop_run(s->evl, 7, 1, true);
         assert_int_equal(r, EVL_OK);
@@ -873,7 +874,8 @@ int main(void) {
                 setup_eventloop_deterministic_edf_overrun, teardown_eventloop),
             cmocka_unit_test_setup_teardown(
                 test_eventloop_edf_deterministic_overrun_first_allowed,
-                setup_eventloop_deterministic_edf_overrun_first_allowed, teardown_eventloop),
+                setup_eventloop_deterministic_edf_overrun_first_allowed,
+                teardown_eventloop),
             cmocka_unit_test_setup_teardown(
                 test_eventloop_edf_deterministic_cant_overrun,
                 setup_eventloop_deterministic_edf, teardown_eventloop),

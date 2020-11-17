@@ -118,12 +118,13 @@ static void refill_generator(jobgen* jg, TASK_INT taskid) {
         float p0 = task_get_prob(t, 0);
         JOB_INT overruntime;
         if ((c2 > 0) && (p0 < 1.0f)) {
-                /* Overrun time is relative, don't know absolute times until simulation */
+                /* Overrun time is relative, don't know absolute times until
+                 * simulation */
                 overruntime = c1 + 1;
         } else {
-                // Overruntime beyond computation is not put to use by eventloop.
-                // This effectively sets the overruntime to "not available" or
-                // irrelevant.
+                // Overruntime beyond computation is not put to use by
+                // eventloop. This effectively sets the overruntime to "not
+                // available" or irrelevant.
                 overruntime = gamma + 1;
         }
 

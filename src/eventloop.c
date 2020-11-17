@@ -30,11 +30,13 @@ struct eventloop {
         bool allow_first_overrun;
 };
 
-eventloop* eventloop_init(jobgen* const jg, bool init, bool allow_first_overrun) {
+eventloop* eventloop_init(jobgen* const jg,
+                          bool init,
+                          bool allow_first_overrun) {
         eventloop* evl = calloc(1, sizeof(eventloop));
         if (evl) {
-                evl-> had_overrun = false;
-                evl-> allow_first_overrun = allow_first_overrun;
+                evl->had_overrun = false;
+                evl->allow_first_overrun = allow_first_overrun;
                 evl->jg = jg;
                 evl->pq = jobq_init();
                 if (init) {  // differentiate to support resume from state dump
@@ -94,21 +96,32 @@ eventloop_result eventloop_run(eventloop* evl,
                 bool current_job_overruns = false;
                 if (currentjob) {
                         overrun = evl->now + job_get_overruntime(currentjob);
-                        current_job_overruns = job_get_overruntime(currentjob) < job_get_computation(currentjob);
+                        current_job_overruns = job_get_overruntime(currentjob) <
+                                               job_get_computation(currentjob);
                 }
                 if (overrunbreak && current_job_overruns) {
                         if (evl->allow_first_overrun) {
                                 if (evl->had_overrun) {
                                         runtime = overrun - evl->now;
                                 } else {
-                                        /* Execution of next job is beyond its overrun; take note. */
+                                        /* Execution of next job is beyond its
+                                         * overrun; take note. */
                                         evl->had_overrun = true;
-                                        fprintf(stdout,
-                                                "Overflowing job of task %" PRId64
-                                                " arrives at %" PRId64 " with deadline at %" PRId64
-                                                " and computation of %" PRId64
-                                                " which is an overrun of %" PRId64 " \n",
-                                                job_get_taskid(currentjob), job_get_starttime(currentjob), job_get_deadline(currentjob), job_get_computation(currentjob), (job_get_computation(currentjob) - job_get_overruntime(currentjob) - 1));
+                                        fprintf(
+                                            stdout,
+                                            "Overflowing job of task %" PRId64
+                                            " arrives at %" PRId64
+                                            " with deadline at %" PRId64
+                                            " and computation of %" PRId64
+                                            " which is an overrun of %" PRId64
+                                            " \n",
+                                            job_get_taskid(currentjob),
+                                            job_get_starttime(currentjob),
+                                            job_get_deadline(currentjob),
+                                            job_get_computation(currentjob),
+                                            (job_get_computation(currentjob) -
+                                             job_get_overruntime(currentjob) -
+                                             1));
                                 }
                         } else {
                                 runtime = overrun - evl->now;
@@ -163,8 +176,9 @@ eventloop_result eventloop_run(eventloop* evl,
                         break;
                 }
                 if (overrunbreak && (evl->now == overrun)) {
-                        /* If first overrun is tolerated, we do not hit this block because we worked past overruntime
-                         * until the job was finished.
+                        /* If first overrun is tolerated, we do not hit this
+                         * block because we worked past overruntime until the
+                         * job was finished.
                          */
                         evl->currentjob = currentjob;
                         evl->nextjob = nextjob;
