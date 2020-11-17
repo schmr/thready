@@ -26,7 +26,6 @@ struct jobgen {
         jobq* jq;
         JOB_INT* simtime_state;
         rnd_pcg_t** pcg;
-        bool had_overrun;
 };
 
 static void refill_generator(jobgen* jg, TASK_INT taskid);
@@ -38,7 +37,6 @@ jobgen* jobgen_init(ts const* const tasksystem, uint32_t seed, bool refill) {
 
         // Maybe flatten error handling with goto?
         if (jgen && simtime_state) {
-                jgen->had_overrun = false;
                 jgen->jq = jque;
                 jgen->tsy = tasksystem;
                 jgen->simtime_state = simtime_state;
@@ -114,16 +112,6 @@ static void refill_generator(jobgen* jg, TASK_INT taskid) {
         JOB_INT deadline = alpha + reldead;
 
         JOB_INT c1 = task_get_comp(t, 1);
-        if ((gamma > c1) && (!jg->had_overrun)) {
-                jg->had_overrun = true;
-                fprintf(stdout,
-                        "Overflowing job of task %" PRId64
-                        " arrives at %" PRId64 " with deadline at %" PRId64
-                        " and computation of %" PRId64
-                        " which is an overrun of %" PRId64 " \n",
-                        taskid, alpha, deadline, gamma, (gamma - c1));
-        }
-
         // If a non-zero computation budget is defined and we can reach it by
         // chance the task is a high criticality task and can overrun.
         JOB_INT c2 = task_get_comp(t, 2);

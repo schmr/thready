@@ -103,6 +103,12 @@ eventloop_result eventloop_run(eventloop* evl,
                                 } else {
                                         /* Execution of next job is beyond its overrun; take note. */
                                         evl->had_overrun = true;
+                                        fprintf(stdout,
+                                                "Overflowing job of task %" PRId64
+                                                " arrives at %" PRId64 " with deadline at %" PRId64
+                                                " and computation of %" PRId64
+                                                " which is an overrun of %" PRId64 " \n",
+                                                job_get_taskid(currentjob), job_get_starttime(currentjob), job_get_deadline(currentjob), job_get_computation(currentjob), (job_get_computation(currentjob) - job_get_overruntime(currentjob) - 1));
                                 }
                         } else {
                                 runtime = overrun - evl->now;
