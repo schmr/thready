@@ -12,6 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 ### Security
 
+## [1.4.5] - 2020-11-18
+### Added
+- Assertions
+### Fixed
+- Further wrong calculation of overflow by x on first overrun
+
 ## [1.4.4] - 2020-11-17
 ### Fixed
 - Wrong calculation of overflow by x on first overrun

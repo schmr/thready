@@ -68,6 +68,10 @@ EVL_INT eventloop_get_now(eventloop* evl) {
         return evl->now;
 }
 
+static JOB_INT max(JOB_INT a, JOB_INT b) {
+        return a > b ? a : b;
+}
+
 eventloop_result eventloop_run(eventloop* evl,
                                JOB_INT breaktime,
                                JOB_INT speed,
@@ -93,13 +97,17 @@ eventloop_result eventloop_run(eventloop* evl,
                 // Check if current task overruns earlier than next task arrival
                 currentjob = jobq_peek(evl->pq);
                 JOB_INT overrun = 0;
+                JOB_INT overrunby = 0;
                 bool current_job_overruns = false;
                 if (currentjob) {
                         overrun = evl->now + job_get_overruntime(currentjob);
-                        current_job_overruns = job_get_overruntime(currentjob) <
+                        current_job_overruns = job_get_overruntime(currentjob) <=
                                                job_get_computation(currentjob);
+                        /* overruntime - 1 == c1 */
+                        overrunby = job_get_computation(currentjob) - (job_get_overruntime(currentjob) - 1);
                 }
                 if (overrunbreak && current_job_overruns) {
+                        assert(overrunby > 0);
                         if (evl->allow_first_overrun) {
                                 if (evl->had_overrun) {
                                         runtime = overrun - evl->now;
@@ -113,15 +121,12 @@ eventloop_result eventloop_run(eventloop* evl,
                                             " arrives at %" PRId64
                                             " with deadline at %" PRId64
                                             " and computation of %" PRId64
-                                            " which is an overrun of %" PRId64
-                                            " \n",
+                                            " which is an overrun of %" PRId64 "\n",
                                             job_get_taskid(currentjob),
                                             job_get_starttime(currentjob),
                                             job_get_deadline(currentjob),
                                             job_get_computation(currentjob),
-                                            (job_get_computation(currentjob) -
-                                             job_get_overruntime(currentjob) -
-                                             1));
+                                            overrunby);
                                 }
                         } else {
                                 evl->had_overrun = true;
@@ -141,7 +146,8 @@ eventloop_result eventloop_run(eventloop* evl,
                         if (workdelta <= c) {  // Spend complete runtime on job
                                 evl->now = evl->now + runtime;
                                 job_set_computation(currentjob, c - workdelta);
-                                job_set_overruntime(currentjob, o - workdelta);
+                                job_set_overruntime(currentjob,
+                                                    max(0, o - workdelta));
                                 runtime = 0;
                         } else {  // Finish job and update runtime budget
                                 JOB_INT time_spent =
