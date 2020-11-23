@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 ### Security
 
+## [1.4.6] - 2020-11-23
+### Fixed
+- Neglecting earlier arrival in case of overrun
+
 ## [1.4.5] - 2020-11-18
 ### Added
 - Assertions

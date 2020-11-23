@@ -98,15 +98,22 @@ eventloop_result eventloop_run(eventloop* evl,
                 currentjob = jobq_peek(evl->pq);
                 JOB_INT overrun = 0;
                 JOB_INT overrunby = 0;
+                JOB_INT runtime_to_overrun =
+                    runtime + 1;  // dummy value to skip adjusting runtime to
+                                  // overrun if arrival is earlier
                 bool current_job_overruns = false;
                 if (currentjob) {
+                        runtime_to_overrun = job_get_overruntime(currentjob);
                         overrun = evl->now + job_get_overruntime(currentjob);
-                        current_job_overruns = job_get_overruntime(currentjob) <=
-                                               job_get_computation(currentjob);
+                        current_job_overruns =
+                            job_get_overruntime(currentjob) <=
+                            job_get_computation(currentjob);
                         /* overruntime - 1 == c1 */
-                        overrunby = job_get_computation(currentjob) - (job_get_overruntime(currentjob) - 1);
+                        overrunby = job_get_computation(currentjob) -
+                                    (job_get_overruntime(currentjob) - 1);
                 }
-                if (overrunbreak && current_job_overruns) {
+                if (overrunbreak && current_job_overruns &&
+                    (runtime_to_overrun <= runtime)) {
                         assert(overrunby > 0);
                         if (evl->allow_first_overrun) {
                                 if (evl->had_overrun) {
@@ -121,7 +128,8 @@ eventloop_result eventloop_run(eventloop* evl,
                                             " arrives at %" PRId64
                                             " with deadline at %" PRId64
                                             " and computation of %" PRId64
-                                            " which is an overrun of %" PRId64 "\n",
+                                            " which is an overrun of %" PRId64
+                                            "\n",
                                             job_get_taskid(currentjob),
                                             job_get_starttime(currentjob),
                                             job_get_deadline(currentjob),
